@@ -1,0 +1,12 @@
+{
+    "tournament_id": "T2",
+    "name": "OPen",
+    "location": "Rouen",
+    "start_date": "27/07/2023",
+    "end_date": "27/07/2023",
+    "number_of_rounds": 4,
+    "players": [
+        "J001",
+        "J002"
+    ]
+}
