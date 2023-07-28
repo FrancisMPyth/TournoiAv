@@ -19,6 +19,14 @@ class TournamentListView:
                 print(" - Aucun joueur inscrit.")
             print("=" * 40)
 
+    def display_players(self, tournament):
+        print(f"Joueurs inscrits au tournoi '{tournament.name}' :")
+        if tournament.players:
+            for player in tournament.players:
+                print(f"- {player.first_name} {player.last_name} (ID: {player.chess_id})")
+        else:
+            print("Aucun joueur inscrit dans ce tournoi.")
+
     def display_tournament_details(self, tournament):
         print(f"Identifiant : {tournament.tournament_id}")
         print(f"Nom : {tournament.name}")
@@ -32,10 +40,3 @@ class TournamentListView:
         # ... (code pour enregistrer le tournoi dans un fichier)
         pass
 
-    def display_players(self, tournament):
-        print(f"Joueurs inscrits au tournoi '{tournament.name}' :")
-        if tournament.players:
-            for player in tournament.players:
-                print(f"- {player.first_name} {player.last_name} (ID: {player.chess_id})")
-        else:
-            print("Aucun joueur inscrit dans ce tournoi.")
