@@ -1,4 +1,4 @@
-# tournamentListiews.py
+# tournament_views.py
 
 class TournamentListView:
     def display_tournaments(self, tournament_controller):
@@ -11,12 +11,6 @@ class TournamentListView:
             print(f"Début : {tournament.start_date.strftime('%d/%m/%Y')}")
             print(f"Fin : {tournament.end_date.strftime('%d/%m/%Y')}")
             print(f"Nombre de rounds : {tournament.number_of_rounds}")
-            print("Joueurs inscrits :")
-            if tournament.players:
-                for player in tournament.players:
-                    print(f" - {player.first_name} {player.last_name} (ID: {player.chess_id})")
-            else:
-                print(" - Aucun joueur inscrit.")
             print("=" * 40)
 
     def display_players(self, tournament):
@@ -37,5 +31,5 @@ class TournamentListView:
 
     def save_tournament_to_file(self, tournament):
         filepath = f"Data/Tournois/{tournament.name}/info_{tournament.name}.json"
+        # ... (code pour enregistrer le tournoi dans un fichier)
         pass
-
