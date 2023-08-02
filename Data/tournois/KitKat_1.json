@@ -1,9 +1,9 @@
 {
-    "tournament_id": "KitKat_2",
+    "tournament_id": "KitKat_1",
     "name": "KitKat",
-    "location": "Paris",
-    "start_date": "28/12/2023",
-    "end_date": "28/12/2023",
+    "location": "Rouen",
+    "start_date": "28/10/2023",
+    "end_date": "28/10/2023",
     "number_of_rounds": 4,
     "players": []
 }

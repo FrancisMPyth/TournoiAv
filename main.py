@@ -20,7 +20,6 @@ def main():
     tournament_list_view = TournamentListView()
     tournament_management_view = TournamentManagementView(tournament_controller)
 
-
     while True:
         print("Menu Principal:")
         print("1. Enregistrement des Joueurs")
@@ -46,7 +45,12 @@ def main():
             tournament_id = input("Spécifiez l'identifiant du tournoi à gérer ('q' pour quitter) : ")
             if tournament_id.lower() == "q":
                 continue
-            tournament = tournament_controller.select_tournament(tournament_id)
+            tournament = None
+            tournaments = tournament_controller.get_tournaments()
+            for t in tournaments:
+                if t.tournament_id == tournament_id:
+                    tournament = t
+                    break
             if tournament is not None:
                 tournament_management_view.manage_tournament(tournament)
         elif choice.lower() == "q":
