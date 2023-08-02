@@ -66,10 +66,10 @@ class PlayerController:
         else:
             print("Le fichier des joueurs n'existe pas. Une nouvelle liste de joueurs sera créée.")
 
-    # Fonction pour gérer la sérialisation des objets joueurs
+    
     def player_json_serialize(self, obj):
         if isinstance(obj, datetime):
             return obj.strftime("%d/%m/%Y")
         elif isinstance(obj, Player):
-            return obj.__dict__  # Utiliser le dictionnaire représentant l'objet joueur
+            return obj.__dict__  
         raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")

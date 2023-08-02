@@ -4,48 +4,55 @@
         "last_name": "Meterfi",
         "date_of_birth": "06/11/1969",
         "chess_id": "J001",
-        "national_chess_id": "LM12345"
+        "national_chess_id": "ML12345"
     },
     {
         "first_name": "Gustave",
         "last_name": "Eiffel",
-        "date_of_birth": "02/10/1965",
+        "date_of_birth": "12/10/1956",
         "chess_id": "J002",
-        "national_chess_id": "LK32145"
+        "national_chess_id": "LK45678"
     },
     {
         "first_name": "L\u00e9on",
         "last_name": "Po",
-        "date_of_birth": "12/10/1945",
+        "date_of_birth": "10/01/1945",
         "chess_id": "J003",
-        "national_chess_id": "ML12345"
+        "national_chess_id": "DF14785"
+    },
+    {
+        "first_name": "Adolphe",
+        "last_name": "Petti",
+        "date_of_birth": "12/10/1965",
+        "chess_id": "J004",
+        "national_chess_id": "PO14578"
     },
     {
         "first_name": "Ema",
         "last_name": "Mac",
-        "date_of_birth": "14/10/1975",
-        "chess_id": "J004",
-        "national_chess_id": "LG12345"
+        "date_of_birth": "14/10/1945",
+        "chess_id": "J005",
+        "national_chess_id": "YU25896"
     },
     {
         "first_name": "Bernard",
         "last_name": "Phil",
-        "date_of_birth": "17/07/1985",
-        "chess_id": "J005",
-        "national_chess_id": "PY12356"
+        "date_of_birth": "15/05/1985",
+        "chess_id": "J006",
+        "national_chess_id": "SD25896"
     },
     {
         "first_name": "Vlad",
         "last_name": "Premier",
-        "date_of_birth": "10/01/1956",
-        "chess_id": "J006",
-        "national_chess_id": "PS14789"
+        "date_of_birth": "13/12/1945",
+        "chess_id": "J007",
+        "national_chess_id": "FR14785"
     },
     {
-        "first_name": "Pierre",
+        "first_name": "Pierro",
         "last_name": "Fou",
-        "date_of_birth": "16/12/1945",
-        "chess_id": "J007",
-        "national_chess_id": "RT65478"
+        "date_of_birth": "14/08/1984",
+        "chess_id": "J008",
+        "national_chess_id": "DE12356"
     }
 ]

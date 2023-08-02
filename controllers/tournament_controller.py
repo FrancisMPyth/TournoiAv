@@ -17,6 +17,10 @@ class TournamentController:
         try:
             start_date = datetime.strptime(start_date_str, "%d/%m/%Y")
             end_date = datetime.strptime(end_date_str, "%d/%m/%Y")
+
+            if end_date < start_date:
+                print("La date de fin ne peut pas être antérieure à la date de début.")
+                return
         except ValueError:
             print("Format de date incorrect. Assurez-vous de saisir la date au format jj/mm/aaaa.")
             return
@@ -25,8 +29,7 @@ class TournamentController:
 
         tournament = Tournament(tournament_id, name, location, start_date, end_date, number_of_rounds, [])
         self.tournaments.append(tournament)
-        self.save_tournaments_to_file(tournament)  # Pass the tournament object here
-
+        self.save_tournaments_to_file(tournament)  
         return tournament
 
     def get_tournaments(self):

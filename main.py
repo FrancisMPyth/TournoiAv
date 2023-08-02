@@ -9,15 +9,17 @@ from controllers.tournament_controller import TournamentController
 from tournament_views.PlayerListView import PlayerListView
 from tournament_views.TournamentCreationView import TournamentCreationView
 from tournament_views.TournamentListView import TournamentListView
-
+from tournament_views.TournamentManagementView import TournamentManagementView
 
 def main():
     player_controller = PlayerController()
     tournament_controller = TournamentController(player_controller)
 
     player_list_view = PlayerListView()
-    tournament_creation_view = TournamentCreationView()  # Pas d'arguments ici
-    tournament_list_view = TournamentListView() 
+    tournament_creation_view = TournamentCreationView(tournament_controller, player_controller)
+    tournament_list_view = TournamentListView()
+    tournament_management_view = TournamentManagementView(tournament_controller)
+
 
     while True:
         print("Menu Principal:")
@@ -35,13 +37,18 @@ def main():
         elif choice == "2":
             player_list_view.display_player_list(player_controller)
         elif choice == "3":
-            tournament_creation_view.create_tournament(tournament_controller, player_controller)
+            tournament_creation_view.create_tournament()
         elif choice == "4":
             tournament_list_view.display_tournaments(tournament_controller)
             input("Appuyez sur une touche pour continuer...")
         elif choice == "5":
-            # Reste du code pour la gestion des tournois
-            pass
+            tournament_list_view.display_tournaments(tournament_controller)
+            tournament_id = input("Spécifiez l'identifiant du tournoi à gérer ('q' pour quitter) : ")
+            if tournament_id.lower() == "q":
+                continue
+            tournament = tournament_controller.select_tournament(tournament_id)
+            if tournament is not None:
+                tournament_management_view.manage_tournament(tournament)
         elif choice.lower() == "q":
             break
         else:

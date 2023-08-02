@@ -31,5 +31,5 @@ class TournamentListView:
 
     def save_tournament_to_file(self, tournament):
         filepath = f"Data/Tournois/{tournament.name}/info_{tournament.name}.json"
-        # ... (code pour enregistrer le tournoi dans un fichier)
+       
         pass
