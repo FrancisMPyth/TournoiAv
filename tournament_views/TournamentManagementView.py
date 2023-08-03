@@ -1,11 +1,14 @@
 # TournamentManagementView.py
 
+# TournamentManagementView.py
+
 import json
 from config import GESTION_TOURNOIS_DIR
 
 class TournamentManagementView:
-    def __init__(self, tournament_controller):
+    def __init__(self, tournament_controller, player_controller):
         self.tournament_controller = tournament_controller
+        self.player_controller = player_controller
 
     def manage_tournament(self, tournament):
         print(f"Gestion du tournoi '{tournament.name}' :")
@@ -13,17 +16,18 @@ class TournamentManagementView:
         print("2. Enregistrer le tournoi")
         print("q. Quitter la gestion du tournoi")
 
-        choice = input("Entrez votre choix : ")
+        while True:
+            choice = input("Entrez votre choix : ")
 
-        if choice == "1":
-            self.display_tournament_details(tournament)
-        elif choice == "2":
-            self.save_tournament(tournament)
-        elif choice.lower() == "q":
-            return
-        else:
-            print("Choix invalide. Veuillez réessayer.")
-            self.manage_tournament(tournament)
+            if choice == "1":
+                self.display_tournament_details(tournament)
+            elif choice == "2":
+                self.save_tournament(tournament)
+                break
+            elif choice.lower() == "q":
+                break
+            else:
+                print("Choix invalide. Veuillez réessayer.")
 
     def display_tournament_details(self, tournament):
         print(f"Identifiant : {tournament.tournament_id}")

@@ -24,7 +24,32 @@ class TournamentCreationView:
             print("Format de date incorrect. Assurez-vous de saisir la date au format jj/mm/aaaa.")
             return
 
-        
-        self.tournament_controller.create_tournament(name, location, start_date_str, end_date_str, number_of_rounds)
+        players = self.player_controller.get_players()
+        if not players:
+            print("Aucun joueur enregistré. Veuillez enregistrer des joueurs avant de créer un tournoi.")
+            return
+
+        print("Joueurs disponibles pour le tournoi :")
+        for idx, player in enumerate(players, start=1):
+            print(f"{idx}. {player.first_name} {player.last_name}")
+
+        selected_players = []
+        while True:
+            player_choice = input("Entrez le numéro du joueur à ajouter au tournoi (ou 'q' pour quitter) : ")
+            if player_choice.lower() == "q":
+                break
+
+            try:
+                player_idx = int(player_choice) - 1
+                selected_player = players[player_idx]
+                selected_players.append(selected_player)
+            except (ValueError, IndexError):
+                print("Choix invalide. Veuillez entrer un numéro valide.")
+
+        if not selected_players:
+            print("Aucun joueur sélectionné pour le tournoi.")
+            return
+
+        self.tournament_controller.create_tournament(name, location, start_date_str, end_date_str, number_of_rounds, selected_players)
 
         print(f"Le tournoi '{name}' a été enregistré.")

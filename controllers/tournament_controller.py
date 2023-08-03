@@ -13,7 +13,7 @@ class TournamentController:
         self.player_controller = player_controller
         self.tournaments = self.load_tournaments_from_file()
 
-    def create_tournament(self, name, location, start_date_str, end_date_str, number_of_rounds):
+    def create_tournament(self, name, location, start_date_str, end_date_str, number_of_rounds, selected_players):
         try:
             start_date = datetime.strptime(start_date_str, "%d/%m/%Y")
             end_date = datetime.strptime(end_date_str, "%d/%m/%Y")
@@ -27,10 +27,11 @@ class TournamentController:
 
         tournament_id = self.generate_tournament_id(name)
 
-        tournament = Tournament(tournament_id, name, location, start_date, end_date, number_of_rounds, [])
+        tournament = Tournament(tournament_id, name, location, start_date, end_date, number_of_rounds, selected_players)
         self.tournaments.append(tournament)
-        self.save_tournaments_to_file(tournament)  
+        self.save_tournaments_to_file(tournament)
         return tournament
+
 
     def get_tournaments(self):
         return self.tournaments

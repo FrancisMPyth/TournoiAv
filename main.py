@@ -11,6 +11,7 @@ from tournament_views.TournamentCreationView import TournamentCreationView
 from tournament_views.TournamentListView import TournamentListView
 from tournament_views.TournamentManagementView import TournamentManagementView
 
+
 def main():
     player_controller = PlayerController()
     tournament_controller = TournamentController(player_controller)
@@ -18,7 +19,7 @@ def main():
     player_list_view = PlayerListView()
     tournament_creation_view = TournamentCreationView(tournament_controller, player_controller)
     tournament_list_view = TournamentListView()
-    tournament_management_view = TournamentManagementView(tournament_controller)
+    tournament_management_view = TournamentManagementView(tournament_controller, player_controller)
 
     while True:
         print("Menu Principal:")
