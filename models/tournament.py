@@ -11,6 +11,7 @@ class Tournament:
         self.end_date = end_date
         self.number_of_rounds = number_of_rounds
         self.players = players
+        self.rounds = []  
 
     def add_player(self, player):
         self.players.append(player)
