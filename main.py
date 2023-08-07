@@ -1,6 +1,4 @@
 # main.py
-
-
 import os
 import json
 from datetime import datetime
@@ -11,6 +9,8 @@ from tournament_views.TournamentCreationView import TournamentCreationView
 from tournament_views.TournamentListView import TournamentListView
 from tournament_views.TournamentManagementView import TournamentManagementView
 
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 def main():
     player_controller = PlayerController()
@@ -22,6 +22,7 @@ def main():
     tournament_management_view = TournamentManagementView(tournament_controller, player_controller)
 
     while True:
+        clear_screen()
         print("Menu Principal:")
         print("1. Enregistrement des Joueurs")
         print("2. Afficher la liste des joueurs")

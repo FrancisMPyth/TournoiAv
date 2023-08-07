@@ -2,7 +2,7 @@
 
 from datetime import datetime
 import re
-
+import os
 
 
 class PlayerListView:
@@ -32,6 +32,8 @@ class PlayerListView:
         player_controller.add_player(first_name, last_name, date_of_birth, chess_id, national_chess_id)
         print("Joueur enregistré avec succès!")
 
+        os.system("pause")  
+
     def display_player_list(self, player_controller):
         players = player_controller.get_players()
         players_sorted = sorted(players, key=lambda player: f"{player.last_name} {player.first_name}")
@@ -43,3 +45,5 @@ class PlayerListView:
             print(f"Date de naissance: {player.date_of_birth.strftime('%d/%m/%Y')}")
             print(f"Identifiant: {player.chess_id}")
             print(f"Identifiant national d'échecs: {player.national_chess_id}\n")
+
+        os.system("pause")  
