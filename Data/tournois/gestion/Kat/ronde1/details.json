@@ -1,0 +1,58 @@
+{
+    "tournament_id": "Kat_1",
+    "round_number": 1,
+    "matches": [
+        {
+            "match_number": 1,
+            "player1": {
+                "first_name": "Francis",
+                "last_name": "Meterfi",
+                "chess_id": "Joueur001"
+            },
+            "player2": {
+                "first_name": "Gustave",
+                "last_name": "Eiffel",
+                "chess_id": "Joueur002"
+            }
+        },
+        {
+            "match_number": 2,
+            "player1": {
+                "first_name": "L\u00e9on",
+                "last_name": "Po",
+                "chess_id": "Joueur003"
+            },
+            "player2": {
+                "first_name": "Adolphe",
+                "last_name": "Petti",
+                "chess_id": "Joueur004"
+            }
+        },
+        {
+            "match_number": 3,
+            "player1": {
+                "first_name": "Ema",
+                "last_name": "Mac",
+                "chess_id": "Joueur005"
+            },
+            "player2": {
+                "first_name": "Bernard",
+                "last_name": "Phil",
+                "chess_id": "Joueur006"
+            }
+        },
+        {
+            "match_number": 4,
+            "player1": {
+                "first_name": "Vlad",
+                "last_name": "Premier",
+                "chess_id": "Joueur007"
+            },
+            "player2": {
+                "first_name": "Pierro",
+                "last_name": "Fou",
+                "chess_id": "Joueur008"
+            }
+        }
+    ]
+}

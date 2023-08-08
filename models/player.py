@@ -9,3 +9,4 @@ class Player:
         self.date_of_birth = date_of_birth
         self.chess_id = chess_id
         self.national_chess_id = national_chess_id
+        self.score = 0 

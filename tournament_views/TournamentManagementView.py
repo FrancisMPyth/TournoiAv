@@ -18,7 +18,7 @@ class TournamentManagementView:
             print(f"Gestion du tournoi '{tournament.name}' :")
             print("1. Afficher les détails du tournoi")
             print("2. Gérer les rounds du tournoi")
-            print("3. Afficher le rapport du tournoi")
+            print("3. Saisir les résultats des matches")
             print("q. Quitter la gestion du tournoi")
 
             choice = input("Entrez votre choix : ")
@@ -28,7 +28,7 @@ class TournamentManagementView:
             elif choice == "2":
                 self.manage_rounds(tournament)
             elif choice == "3":
-                self.display_tournament_report(tournament)
+                self.enter_match_results(tournament)
             elif choice.lower() == "q":
                 break
             else:
@@ -63,6 +63,22 @@ class TournamentManagementView:
             "players": players_ids
         }
         return tournament_data
+
+    def select_round(self, tournament):
+        round_count = len(tournament.rounds)
+        while True:
+            try:
+                clear_screen()
+                print(f"Sélectionner le round pour saisir les résultats des matches pour le tournoi '{tournament.name}' :")
+                for idx, round_pairs in enumerate(tournament.rounds, 1):
+                    print(f"Round {idx}")
+                selected_round = int(input(f"Entrez le numéro du round (1 à {round_count}) : "))
+                if 1 <= selected_round <= round_count:
+                    return selected_round
+                else:
+                    print("Numéro de round invalide. Veuillez réessayer.")
+            except ValueError:
+                print("Veuillez entrer un numéro valide.")
 
     def manage_rounds(self, tournament):
         while True:
@@ -122,6 +138,48 @@ class TournamentManagementView:
 
         self.display_existing_rounds(tournament)
 
+        # Créez un répertoire pour le tournoi s'il n'existe pas déjà
+        tournament_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.name)
+        if not os.path.exists(tournament_dir):
+            os.makedirs(tournament_dir)
+
+        # Créez un sous-répertoire pour le round dans le répertoire du tournoi
+        round_number = len(tournament.rounds)
+        round_subdir = os.path.join(tournament_dir, f"ronde{round_number}")
+        os.makedirs(round_subdir)
+
+        # Créez un fichier pour enregistrer les détails du round
+        round_details_file = os.path.join(round_subdir, "details.json")
+        with open(round_details_file, "w") as file:
+            round_data = self.serialize_round_details(tournament, round_number)
+            json.dump(round_data, file, indent=4)
+
+    def serialize_round_details(self, tournament, round_number):
+        round_data = {
+            "tournament_id": tournament.tournament_id,
+            "round_number": round_number,
+            "matches": []
+        }
+
+        round_pairs = tournament.rounds[round_number - 1]  # -1 because rounds are 0-indexed
+        for match_idx, pair in enumerate(round_pairs, 1):
+            match_data = {
+                "match_number": match_idx,
+                "player1": {
+                    "first_name": pair[0].first_name,
+                    "last_name": pair[0].last_name,
+                    "chess_id": pair[0].chess_id
+                },
+                "player2": {
+                    "first_name": pair[1].first_name,
+                    "last_name": pair[1].last_name,
+                    "chess_id": pair[1].chess_id
+                }
+            }
+            round_data["matches"].append(match_data)
+
+        return round_data
+
     def assign_round_identifiers(self, players):
         for i, player in enumerate(players, 1):
             player.chess_id = f"Joueur{i:03d}"
@@ -142,10 +200,36 @@ class TournamentManagementView:
     def enter_match_results(self, tournament):
         clear_screen()
         print("Saisir les résultats des matches pour un round spécifique...")
-        input("Appuyez sur Entrée pour continuer...")
+
+        round_number = self.select_round(tournament)  # Sélectionner le round
+
+        if round_number is not None:
+            selected_round = tournament.rounds[round_number - 1]
+
+            for match_idx, match_pair in enumerate(selected_round, 1):
+                print(f"Match {match_idx}: {match_pair[0].first_name} {match_pair[0].last_name} vs. {match_pair[1].first_name} {match_pair[1].last_name}")
+
+                for player in match_pair:
+                    result = input(f"Entrez le résultat pour {player.first_name} {player.last_name} (G pour gagnant, N pour partie nulle) : ").upper()
+
+                    if result == "G":
+                        other_player = match_pair[1] if player == match_pair[0] else match_pair[0]
+
+                        if other_player.score == 0:
+                            player.score += 1
+                            print(f"{player.first_name} {player.last_name} a été déclaré gagnant.")
+                        else:
+                            print("Un joueur ne peut pas être déclaré gagnant dans le même match.")
+                    elif result == "N":
+                        player.score += 0.5
+                        print(f"{player.first_name} {player.last_name} a été déclaré partie nulle.")
+                    else:
+                        print("Résultat invalide. Veuillez entrer 'G' pour gagnant ou 'N' pour partie nulle.")
+
+
+
 
     def display_tournament_report(self, tournament):
         clear_screen()
         print("Afficher le rapport du tournoi...")
         input("Appuyez sur Entrée pour continuer...")
-
