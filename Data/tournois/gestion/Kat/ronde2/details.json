@@ -1,6 +1,6 @@
 {
     "tournament_id": "Kat_1",
-    "round_number": 1,
+    "round_number": 2,
     "matches": [
         {
             "match_number": 1,
@@ -10,17 +10,17 @@
                 "chess_id": "Joueur001"
             },
             "player2": {
-                "first_name": "Gustave",
-                "last_name": "Eiffel",
-                "chess_id": "Joueur002"
+                "first_name": "L\u00e9on",
+                "last_name": "Po",
+                "chess_id": "Joueur003"
             }
         },
         {
             "match_number": 2,
             "player1": {
-                "first_name": "L\u00e9on",
-                "last_name": "Po",
-                "chess_id": "Joueur003"
+                "first_name": "Gustave",
+                "last_name": "Eiffel",
+                "chess_id": "Joueur002"
             },
             "player2": {
                 "first_name": "Adolphe",

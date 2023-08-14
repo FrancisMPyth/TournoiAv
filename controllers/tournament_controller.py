@@ -7,7 +7,6 @@ from datetime import datetime
 from models.tournament import Tournament
 from config import DATA_DIR, TOURNOIS_DIR
 
-
 class TournamentController:
     def __init__(self, player_controller):
         self.player_controller = player_controller
@@ -32,7 +31,6 @@ class TournamentController:
         self.save_tournaments_to_file(tournament)
         return tournament
 
-
     def get_tournaments(self):
         return self.tournaments
 
@@ -53,23 +51,29 @@ class TournamentController:
                     with open(filepath, "r") as f:
                         try:
                             tournament_data = json.load(f)
-                            players = self.load_players_for_tournament(tournament_data)
-                            tournament = Tournament(
-                                tournament_data["tournament_id"],
-                                tournament_data["name"],
-                                tournament_data["location"],
-                                datetime.strptime(tournament_data["start_date"], "%d/%m/%Y"),
-                                datetime.strptime(tournament_data["end_date"], "%d/%m/%Y"),
-                                tournament_data.get("number_of_rounds", 4),
-                                players
-                            )
-                            tournaments.append(tournament)
+                            if "tournament_id" in tournament_data:
+                                tournament_id = tournament_data["tournament_id"]
+                                tournament = self.create_loaded_tournament(tournament_id, tournament_data)
+                                tournaments.append(tournament)
                         except json.JSONDecodeError:
                             print(f"Erreur lors du chargement des données du fichier : {filepath}")
 
         if not tournaments:
             print("Aucun tournoi enregistré.")
         return tournaments
+
+    def create_loaded_tournament(self, tournament_id, tournament_data):
+        # Extraire les autres données nécessaires du tournament_data
+        name = tournament_data.get("name", "Nom par défaut")
+        location = tournament_data.get("location", "Location par défaut")
+        start_date = datetime.strptime(tournament_data.get("start_date", "01/01/2023"), "%d/%m/%Y")
+        end_date = datetime.strptime(tournament_data.get("end_date", "01/01/2023"), "%d/%m/%Y")
+        number_of_rounds = tournament_data.get("number_of_rounds", 4)
+        players = self.load_players_for_tournament(tournament_data)
+
+        tournament = Tournament(tournament_id, name, location, start_date, end_date, number_of_rounds, players)
+        return tournament
+
 
     def load_players_for_tournament(self, tournament_data):
         players_ids = tournament_data.get("players", [])
@@ -115,3 +119,4 @@ def datetime_to_string(obj):
     if isinstance(obj, datetime):
         return obj.strftime("%d/%m/%Y")
     raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+
