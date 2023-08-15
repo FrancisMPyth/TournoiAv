@@ -1,0 +1,13 @@
+{
+    "match_number": 1,
+    "player1": {
+        "first_name": "Ema",
+        "last_name": "Mac",
+        "chess_id": "J005"
+    },
+    "player2": {
+        "first_name": "Adolphe",
+        "last_name": "Petti",
+        "chess_id": "J004"
+    }
+}
