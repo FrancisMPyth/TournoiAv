@@ -1,7 +1,7 @@
 {
     "tournament_id": "Kat_1",
     "name": "Kat",
-    "location": "Roeun",
+    "location": "Paris",
     "start_date": "28/10/2023",
     "end_date": "28/10/2023",
     "number_of_rounds": 4,
@@ -10,6 +10,9 @@
         "J002",
         "J003",
         "J004",
-        "J005"
+        "J005",
+        "J006",
+        "J007",
+        "J008"
     ]
 }

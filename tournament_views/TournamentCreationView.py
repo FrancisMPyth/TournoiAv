@@ -37,7 +37,16 @@ class TournamentCreationView:
         while True:
             player_choice = input("Entrez le numéro du joueur à ajouter au tournoi (ou 'q' pour quitter) : ")
             if player_choice.lower() == "q":
-                break
+                if len(selected_players) % 2 != 0:
+                    print("Le nombre de joueurs doit être pair. Voulez-vous continuer à ajouter des joueurs ? (o/n)")
+                    continue_choice = input()
+                    if continue_choice.lower() == "o":
+                        continue
+                    else:
+                        print("Annulation de la création du tournoi.")
+                        return
+                else:
+                    break
 
             try:
                 player_idx = int(player_choice) - 1
