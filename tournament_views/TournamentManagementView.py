@@ -15,12 +15,12 @@ class TournamentManagementView:
     def manage_tournament(self, tournament):
         while True:
             clear_screen()
-            print(f"Gestion du tournoi '{tournament.name}' :")
+            print(f"Gestion du tournoi '{tournament.name}':")
             print("1. Afficher les détails du tournoi")
             print("2. Gérer les rounds du tournoi")
             print("3. Saisir les résultats des matches")
-            print("q. Quitter la gestion du tournoi")
-
+            print("4. Retour au Menu") 
+            
             choice = input("Entrez votre choix : ")
 
             if choice == "1":
@@ -28,12 +28,13 @@ class TournamentManagementView:
             elif choice == "2":
                 self.manage_rounds(tournament)
             elif choice == "3":
-                self.enter_match_results(tournament)
+                self.record_match_results(tournament)
+            elif choice == "4":
+                break  # Quitter la gestion du tournoi
             elif choice.lower() == "q":
-                break
+                return  # Quitter la gestion du tournoi sans enregistrer
             else:
                 print("Choix invalide. Veuillez réessayer.")
-                input("Appuyez sur Entrée pour continuer...")
 
     def display_tournament_details(self, tournament):
         clear_screen()
