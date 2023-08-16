@@ -1,0 +1,46 @@
+[
+    {
+        "match_number": 1,
+        "player1": {
+            "name": "Francis Meterfi",
+            "chess_id": "J001"
+        },
+        "player2": {
+            "name": "Gustave Eiffel",
+            "chess_id": "J002"
+        }
+    },
+    {
+        "match_number": 2,
+        "player1": {
+            "name": "L\u00e9on Po",
+            "chess_id": "J003"
+        },
+        "player2": {
+            "name": "Adolphe Petti",
+            "chess_id": "J004"
+        }
+    },
+    {
+        "match_number": 3,
+        "player1": {
+            "name": "Bernard Phil",
+            "chess_id": "J006"
+        },
+        "player2": {
+            "name": "Pierro Fou",
+            "chess_id": "J008"
+        }
+    },
+    {
+        "match_number": 4,
+        "player1": {
+            "name": "Vlad Premier",
+            "chess_id": "J007"
+        },
+        "player2": {
+            "name": "Ema Mac",
+            "chess_id": "J005"
+        }
+    }
+]

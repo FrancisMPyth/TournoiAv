@@ -63,7 +63,6 @@ class TournamentController:
         return tournaments
 
     def create_loaded_tournament(self, tournament_id, tournament_data):
-        # Extraire les autres données nécessaires du tournament_data
         name = tournament_data.get("name", "Nom par défaut")
         location = tournament_data.get("location", "Location par défaut")
         start_date = datetime.strptime(tournament_data.get("start_date", "01/01/2023"), "%d/%m/%Y")
@@ -73,7 +72,6 @@ class TournamentController:
 
         tournament = Tournament(tournament_id, name, location, start_date, end_date, number_of_rounds, players)
         return tournament
-
 
     def load_players_for_tournament(self, tournament_data):
         players_ids = tournament_data.get("players", [])
@@ -98,7 +96,7 @@ class TournamentController:
         }
         return tournament_data
 
-    def get_unique_filepath(self, tournament):
+    def get_unique_filepath(self, tournament): 
         name = tournament.name
         name_suffix = 1
 
@@ -119,4 +117,3 @@ def datetime_to_string(obj):
     if isinstance(obj, datetime):
         return obj.strftime("%d/%m/%Y")
     raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
-
