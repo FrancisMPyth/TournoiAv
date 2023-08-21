@@ -16,24 +16,18 @@ class TournamentManagementView:
         while True:
             clear_screen()
             print(f"Gestion du tournoi '{tournament.name}':")
-            print("1. Lancement du Tournoi")
-            print("2. Gérer les matchs du tournoi")
-            print("3. Saisir les résultats des matchs")
-            print("4. Afficher les détails du tournoi")
-            print("5. Retour au Menu principal")
+            print("1. Gérer les matchs du tournoi")
+            print("2. Afficher les détails du tournoi")
+            print("3. Retour au Menu principal")
 
             choice = input("Entrez votre choix : ")
 
             if choice == "1":
-                self.launch_tournament(tournament)
-            elif choice == "2":
                 self.manage_rounds(tournament)
-            elif choice == "3":
-                self.record_match_results(tournament)
-            elif choice == "4":
+            elif choice == "2":
                 self.display_tournament_details(tournament)
-            elif choice == "5":
-                break  
+            elif choice == "3":
+                break
             else:
                 print("Choix invalide. Veuillez réessayer.")
                 input("Appuyez sur Entrée pour continuer...")
@@ -62,6 +56,34 @@ class TournamentManagementView:
             print("Il n'y a pas suffisamment de joueurs inscrits pour lancer un round.")
             input("Appuyez sur Entrée pour continuer...")
             return
+
+    def manage_rounds(self, tournament):
+        while True:
+            clear_screen()
+            print(f"Gestion des matchs du tournoi '{tournament.name}':")
+            print("1. Lancer le premier round")
+            print("2. Saisir les résultats des matchs")
+            print("3. Retour à la gestion du tournoi")
+
+            choice = input("Entrez votre choix : ")
+
+            if choice == "1":
+                self.launch_next_round(tournament)
+            elif choice == "2":
+                self.record_match_results(tournament)
+            elif choice == "3":
+                break
+            else:
+                print("Choix invalide. Veuillez réessayer.")
+                input("Appuyez sur Entrée pour continuer...")
+
+    def launch_next_round(self, tournament):
+        # Logique pour lancer le prochain round
+        pass
+
+    def record_match_results(self, tournament):
+        # Logique pour saisir les résultats des matchs
+        pass
 
         first_round_matches = self.create_matches_for_round(tournament.players)
 
