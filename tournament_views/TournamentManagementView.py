@@ -8,6 +8,7 @@ def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 class TournamentManagementView:
+
     def __init__(self, tournament_controller, player_controller):
         self.tournament_controller = tournament_controller
         self.player_controller = player_controller
@@ -15,22 +16,31 @@ class TournamentManagementView:
     def manage_tournament(self, tournament):
         while True:
             clear_screen()
-            print(f"Gestion du tournoi '{tournament.name}':")
-            print("1. Gérer les matchs du tournoi")
-            print("2. Afficher les détails du tournoi")
-            print("3. Retour au Menu principal")
+            print(f"Gestion du tournoi '{tournament.tournament_id}':")
+            print("1. Lancer le premier round")
+            print("2. Saisir les résultats des matchs")
+            print("3. Retour à la gestion du tournoi")
+            print("4. Retour au Menu principal")
 
             choice = input("Entrez votre choix : ")
 
             if choice == "1":
-                self.manage_rounds(tournament)
+                self.launch_first_round(tournament)  
             elif choice == "2":
-                self.display_tournament_details(tournament)
+                self.record_match_results(tournament)
             elif choice == "3":
                 break
+            elif choice == "4":
+                return  
             else:
                 print("Choix invalide. Veuillez réessayer.")
                 input("Appuyez sur Entrée pour continuer...")
+
+    def launch_first_round(self, tournament):
+        pass
+
+    def record_match_results(self, tournament):
+        pass
 
     def display_tournament_details(self, tournament):
         clear_screen()
