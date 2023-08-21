@@ -37,7 +37,61 @@ class TournamentManagementView:
                 input("Appuyez sur Entrée pour continuer...")
 
     def launch_first_round(self, tournament):
-        pass
+        clear_screen()
+        print(f"Lancer le premier round du tournoi '{tournament.name}' :")
+
+        if tournament.number_of_rounds == 0:
+            print("Le tournoi n'a pas encore de rounds.")
+            input("Appuyez sur Entrée pour continuer...")
+            return
+
+        if len(tournament.rounds) > 0 and len(tournament.rounds[0].matches) > 0:
+            print("Le premier round a déjà été lancé.")
+            input("Appuyez sur Entrée pour continuer...")
+            return
+
+        if len(tournament.players) < 2:
+            print("Il n'y a pas suffisamment de joueurs inscrits pour lancer un round.")
+            input("Appuyez sur Entrée pour continuer...")
+            return
+
+        selected_players = self.select_players_for_first_round(tournament.players)
+        if len(selected_players) % 2 != 0:
+            print("Le nombre de joueurs doit être pair pour former des matchs.")
+            input("Appuyez sur Entrée pour continuer...")
+            return
+
+        round_number = 1  # Premier round
+        round_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, f"round{round_number}")
+        os.makedirs(round_dir, exist_ok=True)
+        round_file = os.path.join(round_dir, f"round{round_number}_matches.json")
+
+        matches_data = [self.serialize_match_data(idx + 1, match) for idx, match in enumerate(selected_players)]
+        with open(round_file, "w") as file:
+            json.dump(matches_data, file, indent=4)
+
+        print("Les matches du premier round ont été lancés et enregistrés.")
+        input("Appuyez sur Entrée pour continuer...")
+
+    def select_players_for_first_round(self, players):
+        print("Sélectionnez les joueurs pour le premier round (nombre pair) :")
+        for idx, player in enumerate(players, start=1):
+            print(f"{idx}. {player.first_name} {player.last_name}")
+
+        selected_players = []
+        while True:
+            try:
+                player_choice = input("Entrez le numéro du joueur à ajouter au round (ou 'q' pour quitter) : ")
+                if player_choice.lower() == "q":
+                    break
+
+                player_idx = int(player_choice) - 1
+                selected_player = players[player_idx]
+                selected_players.append(selected_player)
+            except (ValueError, IndexError):
+                print("Choix invalide. Veuillez entrer un numéro valide.")
+
+        return [(selected_players[i], selected_players[i + 1]) for i in range(0, len(selected_players), 2)]
 
     def record_match_results(self, tournament):
         pass
