@@ -2,19 +2,8 @@
     {
         "match_number": 1,
         "player1": {
-            "name": "Ema Mac",
-            "chess_id": "J005"
-        },
-        "player2": {
-            "name": "Pierro Fou",
-            "chess_id": "J008"
-        }
-    },
-    {
-        "match_number": 2,
-        "player1": {
-            "name": "Vlad Premier",
-            "chess_id": "J007"
+            "name": "Bernard Phil",
+            "chess_id": "J006"
         },
         "player2": {
             "name": "Francis Meterfi",
@@ -22,25 +11,36 @@
         }
     },
     {
-        "match_number": 3,
+        "match_number": 2,
         "player1": {
             "name": "Adolphe Petti",
             "chess_id": "J004"
         },
         "player2": {
-            "name": "Bernard Phil",
-            "chess_id": "J006"
+            "name": "Pierro Fou",
+            "chess_id": "J008"
+        }
+    },
+    {
+        "match_number": 3,
+        "player1": {
+            "name": "Gustave Eiffel",
+            "chess_id": "J002"
+        },
+        "player2": {
+            "name": "Vlad Premier",
+            "chess_id": "J007"
         }
     },
     {
         "match_number": 4,
         "player1": {
-            "name": "L\u00e9on Po",
-            "chess_id": "J003"
+            "name": "Ema Mac",
+            "chess_id": "J005"
         },
         "player2": {
-            "name": "Gustave Eiffel",
-            "chess_id": "J002"
+            "name": "L\u00e9on Po",
+            "chess_id": "J003"
         }
     }
 ]

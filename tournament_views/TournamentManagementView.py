@@ -38,10 +38,10 @@ class TournamentManagementView:
 
     def launch_first_round(self, tournament):
         clear_screen()
-        print(f"Lancer le premier round du tournoi '{tournament.name}' :")
+        print(f"Lancer le premier round du tournoi '{tournament.tournament_id}' :")
 
-        if tournament.number_of_rounds == 0:
-            print("Le tournoi n'a pas encore de rounds.")
+        if len(tournament.rounds) >= tournament.number_of_rounds:
+            print(f"Le nombre maximum de rounds ({tournament.number_of_rounds}) a déjà été atteint pour ce tournoi.")
             input("Appuyez sur Entrée pour continuer...")
             return
 
@@ -72,6 +72,9 @@ class TournamentManagementView:
 
         print("Les matches du premier round ont été lancés et enregistrés.")
         input("Appuyez sur Entrée pour continuer...")
+
+
+
 
     def select_players_for_first_round(self, players):
         print("Sélectionnez les joueurs pour le premier round (nombre pair) :")
