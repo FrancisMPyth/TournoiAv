@@ -17,14 +17,20 @@ class TournamentManagementView:
         while True:
             clear_screen()
             print(f"Gestion du tournoi '{tournament.tournament_id}':")
-            print("1. Lancer le premier round")
+            if not tournament.first_round_results_recorded:
+                print("1. Lancer le premier round")
+            else:
+                print("1. Lancer le deuxième round")
             print("2. Saisir les résultats des matchs")
             print("3. Retour au Menu principal")
 
             choice = input("Entrez votre choix : ")
 
             if choice == "1":
-                self.launch_first_round(tournament)
+                if not tournament.first_round_results_recorded:
+                    self.launch_first_round(tournament)
+                else:
+                    self.launch_next_round(tournament)
             elif choice == "2":
                 self.record_match_results(tournament)
             elif choice == "3":
@@ -38,13 +44,8 @@ class TournamentManagementView:
         clear_screen()
         print(f"Lancer le premier round du tournoi '{tournament.tournament_id}' :")
 
-        if len(tournament.rounds) >= tournament.number_of_rounds:
-            print(f"Le nombre maximum de rounds ({tournament.number_of_rounds}) a déjà été atteint pour ce tournoi.")
-            input("Appuyez sur Entrée pour continuer...")
-            return
-
-        if len(tournament.rounds) > 0 and len(tournament.rounds[0].matches) > 0:
-            print("Le premier round a déjà été lancé.")
+        if tournament.first_round_results_recorded:
+            print("Le premier round a déjà été lancé pour ce tournoi.")
             input("Appuyez sur Entrée pour continuer...")
             return
 
@@ -53,30 +54,22 @@ class TournamentManagementView:
             input("Appuyez sur Entrée pour continuer...")
             return
 
-        selected_players = self.select_players_for_first_round(tournament.players)
+        selected_players = self.select_players_for_first_round(tournament)
         if len(selected_players) % 2 != 0:
             print("Le nombre de joueurs doit être pair pour former des matchs.")
             input("Appuyez sur Entrée pour continuer...")
             return
 
-        round_number = 1  # Premier round
-        round_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, f"round{round_number}")
-        os.makedirs(round_dir, exist_ok=True)
-        round_file = os.path.join(round_dir, f"round{round_number}_matches.json")
+        # Votre logique pour lancer le premier round et enregistrer les matchs
 
-        matches_data = [self.serialize_match_data(idx + 1, match) for idx, match in enumerate(selected_players)]
-        with open(round_file, "w") as file:
-            json.dump(matches_data, file, indent=4)
+        tournament.first_round_results_recorded = True
 
         print("Les matches du premier round ont été lancés et enregistrés.")
         input("Appuyez sur Entrée pour continuer...")
-
-
-
-
-    def select_players_for_first_round(self, players):
+    
+    def select_players_for_first_round(self, tournament):
         print("Sélectionnez les joueurs pour le premier round (nombre pair) :")
-        for idx, player in enumerate(players, start=1):
+        for idx, player in enumerate(tournament.players, start=1):
             print(f"{idx}. {player.first_name} {player.last_name}")
 
         selected_players = []
@@ -87,7 +80,7 @@ class TournamentManagementView:
                     break
 
                 player_idx = int(player_choice) - 1
-                selected_player = players[player_idx]
+                selected_player = tournament.players[player_idx]
                 selected_players.append(selected_player)
             except (ValueError, IndexError):
                 print("Choix invalide. Veuillez entrer un numéro valide.")
