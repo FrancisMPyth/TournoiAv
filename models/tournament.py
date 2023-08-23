@@ -11,5 +11,4 @@ class Tournament:
         self.number_of_rounds = number_of_rounds
         self.players = players
         self.rounds = []
-        self.first_round_results_recorded = False  # Nouvel attribut
-
+        self.first_round_results_recorded = False  

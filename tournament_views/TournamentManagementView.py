@@ -60,7 +60,6 @@ class TournamentManagementView:
             input("Appuyez sur Entrée pour continuer...")
             return
 
-        # Votre logique pour lancer le premier round et enregistrer les matchs
 
         tournament.first_round_results_recorded = True
 
@@ -136,11 +135,9 @@ class TournamentManagementView:
                 input("Appuyez sur Entrée pour continuer...")
 
     def launch_next_round(self, tournament):
-        # Logique pour lancer le prochain round
         pass
 
     def record_match_results(self, tournament):
-        # Logique pour saisir les résultats des matchs
         pass
 
         first_round_matches = self.create_matches_for_round(tournament.players)
