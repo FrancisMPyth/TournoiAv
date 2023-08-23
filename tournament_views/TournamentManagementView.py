@@ -19,22 +19,20 @@ class TournamentManagementView:
             print(f"Gestion du tournoi '{tournament.tournament_id}':")
             print("1. Lancer le premier round")
             print("2. Saisir les résultats des matchs")
-            print("3. Retour à la gestion du tournoi")
-            print("4. Retour au Menu principal")
+            print("3. Retour au Menu principal")
 
             choice = input("Entrez votre choix : ")
 
             if choice == "1":
-                self.launch_first_round(tournament)  
+                self.launch_first_round(tournament)
             elif choice == "2":
                 self.record_match_results(tournament)
             elif choice == "3":
-                break
-            elif choice == "4":
                 return  
             else:
                 print("Choix invalide. Veuillez réessayer.")
                 input("Appuyez sur Entrée pour continuer...")
+
 
     def launch_first_round(self, tournament):
         clear_screen()
