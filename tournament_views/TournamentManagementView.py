@@ -3,6 +3,7 @@
 import json
 import os
 from config import GESTION_TOURNOIS_DIR
+from models.round import Round
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -39,13 +40,18 @@ class TournamentManagementView:
                 print("Choix invalide. Veuillez réessayer.")
                 input("Appuyez sur Entrée pour continuer...")
 
-
     def launch_first_round(self, tournament):
         clear_screen()
         print(f"Lancer le premier round du tournoi '{tournament.tournament_id}' :")
 
-        if tournament.first_round_results_recorded:
-            print("Le premier round a déjà été lancé pour ce tournoi.")
+        current_round = len(tournament.rounds) + 1
+        if current_round > 4:
+            print("Tous les rounds ont déjà été lancés pour ce tournoi.")
+            input("Appuyez sur Entrée pour continuer...")
+            return
+
+        if current_round > 1 and not tournament.rounds[current_round - 2].results_recorded:
+            print("Les résultats du round précédent doivent être enregistrés avant de lancer le prochain round.")
             input("Appuyez sur Entrée pour continuer...")
             return
 
@@ -60,12 +66,45 @@ class TournamentManagementView:
             input("Appuyez sur Entrée pour continuer...")
             return
 
+        tournament.first_round_launched = True
+        new_round = Round(current_round)  # Create a new Round object with the round number
+        tournament.rounds.append(new_round)  # Add the new Round to the list of rounds
+        tournament.rounds[current_round - 1].results_recorded = False
 
-        tournament.first_round_results_recorded = True
-
-        print("Les matches du premier round ont été lancés et enregistrés.")
+        print(f"Les matches du round {current_round} ont été lancés et enregistrés.")
         input("Appuyez sur Entrée pour continuer...")
-    
+
+    def launch_next_round(self, tournament):
+        clear_screen()
+        print(f"Lancer le prochain round du tournoi '{tournament.tournament_id}' :")
+
+        current_round = len(tournament.rounds) + 1
+        if current_round > 4:
+            print("Tous les rounds ont déjà été lancés pour ce tournoi.")
+            input("Appuyez sur Entrée pour continuer...")
+            return
+
+        if current_round > 1 and not tournament.rounds[current_round - 2].results_recorded:
+            print("Les résultats du round précédent doivent être enregistrés avant de lancer le prochain round.")
+            input("Appuyez sur Entrée pour continuer...")
+            return
+
+        if len(tournament.players) < 2:
+            print("Il n'y a pas suffisamment de joueurs inscrits pour lancer un round.")
+            input("Appuyez sur Entrée pour continuer...")
+            return
+
+        selected_players = self.select_players_for_first_round(tournament.players)
+        if len(selected_players) % 2 != 0:
+            print("Le nombre de joueurs doit être pair pour former des matchs.")
+            input("Appuyez sur Entrée pour continuer...")
+            return
+
+        tournament.rounds[current_round - 1].results_recorded = False
+
+        print(f"Les matches du round {current_round} ont été lancés et enregistrés.")
+        input("Appuyez sur Entrée pour continuer...")
+
     def select_players_for_first_round(self, tournament):
         print("Sélectionnez les joueurs pour le premier round (nombre pair) :")
         for idx, player in enumerate(tournament.players, start=1):
