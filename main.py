@@ -10,8 +10,10 @@ from tournament_views.TournamentManagementView import TournamentManagementView
 from config import DATA_DIR, TOURNOIS_DIR, GESTION_TOURNOIS_DIR, JOUEURS_DIR
 
 
+
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
+
 
 def main():
     player_controller = PlayerController()
@@ -54,34 +56,11 @@ def main():
                     tournament = t
                     break
             if tournament is not None:
-                tournament_sub_menu(tournament_management_view, tournament)
+                tournament_management_view.tournament_sub_menu(tournament)  # Appel ici
         elif choice.lower() == "q":
             break
         else:
             print("Choix invalide. Veuillez réessayer.")
-
-def tournament_sub_menu(self, tournament):
-        while True:
-            clear_screen()
-            print(f"Gestion du tournoi '{tournament.tournament_id}':")
-            if not tournament.first_round_results_recorded:
-                print("1. Lancer le premier round")
-            else:
-                print("1. Saisie des résultats")  # Mettre à jour l'affichage ici
-            print("2. Retour au Menu principal")
-
-            sub_choice = input("Entrez votre choix : ")
-
-            if sub_choice == "1":
-                if not tournament.first_round_results_recorded:
-                    self.launch_first_round(tournament)
-                else:
-                    self.record_match_results(tournament)
-            elif sub_choice == "2":
-                break
-            else:
-                print("Choix invalide. Veuillez réessayer.")
-                input("Appuyez sur Entrée pour continuer...")
 
 
 if __name__ == "__main__":

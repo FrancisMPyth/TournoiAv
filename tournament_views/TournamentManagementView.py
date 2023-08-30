@@ -7,7 +7,6 @@ from models.round import Round
 from models.player import Player
 from models.match import Match
 
-
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -219,3 +218,70 @@ class TournamentManagementView:
             }
         }
         return match_data
+    
+
+    def display_report(self, tournament):
+        clear_screen()
+        current_round = len(tournament.rounds)
+
+        round_dir = os.path.join(os.path.abspath(GESTION_TOURNOIS_DIR), tournament.tournament_id, "rounds")
+
+        print(f"Contenu du répertoire des rounds : {round_dir}\n")
+
+        files_in_rounds = os.listdir(round_dir)
+        if not files_in_rounds:
+            print("Aucun fichier trouvé dans le répertoire des rounds.")
+        else:
+            for idx, filename in enumerate(files_in_rounds, start=1):
+                print(f"{idx}. {filename}")
+
+            choice = input("\nEntrez le numéro du fichier à afficher (ou 'q' pour quitter) : ")
+            if choice.lower() == 'q':
+                return
+            
+            try:
+                file_idx = int(choice) - 1
+                if 0 <= file_idx < len(files_in_rounds):
+                    selected_file = files_in_rounds[file_idx]
+                    file_path = os.path.join(round_dir, selected_file)
+                    print(f"Affichage du contenu du fichier : {selected_file}\n")
+                    
+                    with open(file_path, "r") as file:
+                        file_content = file.read()
+                        print(file_content)
+                else:
+                    print("Choix invalide. Veuillez entrer un numéro valide.")
+            except ValueError:
+                print("Choix invalide. Veuillez entrer un numéro valide.")
+
+        input("\nAppuyez sur Entrée pour continuer...")
+
+
+
+    def tournament_sub_menu(self, tournament):
+        while True:
+            clear_screen()
+            print(f"Gestion du tournoi '{tournament.tournament_id}':")
+            if not tournament.first_round_results_recorded:
+                print("1. Lancer le premier round")
+            else:
+                print("1. Saisie des résultats")
+            print("2. Afficher le rapport")
+            print("3. Retour au Menu principal")
+
+            sub_choice = input("Entrez votre choix : ")
+
+            if sub_choice == "1":
+                if not tournament.first_round_results_recorded:
+                    self.launch_first_round(tournament)
+                else:
+                    self.record_match_results(tournament)
+            elif sub_choice == "2":
+                self.display_report(tournament)
+            elif sub_choice == "3":
+                break
+            else:
+                print("Choix invalide. Veuillez réessayer.")
+                input("Appuyez sur Entrée pour continuer...")
+
+
