@@ -56,7 +56,7 @@ def main():
                     tournament = t
                     break
             if tournament is not None:
-                tournament_management_view.tournament_sub_menu(tournament)  # Appel ici
+                tournament_management_view.tournament_sub_menu(tournament)  
         elif choice.lower() == "q":
             break
         else:

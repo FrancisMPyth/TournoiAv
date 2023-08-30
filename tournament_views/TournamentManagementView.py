@@ -20,29 +20,28 @@ class TournamentManagementView:
         while True:
             clear_screen()
             print(f"Gestion du tournoi '{tournament.tournament_id}':")
-            if not tournament.first_round_results_recorded:
+            if not tournament.first_round_launched:
                 print("1. Lancer le premier round")
             else:
-                print("1. Lancer le deuxième round")
+                print("1. Lancer le prochain round")  
             print("2. Saisir les résultats des matchs")
             print("3. Retour au Menu principal")
 
             choice = input("Entrez votre choix : ")
 
             if choice == "1":
-                if not tournament.first_round_results_recorded:
+                if not tournament.first_round_launched:
                     self.launch_first_round(tournament)
+                    tournament.first_round_launched = True  
                 else:
                     self.launch_next_round(tournament)
-            elif choice == "2":
-                self.record_match_results(tournament)
-            elif choice == "3":
-                return  
-            else:
-                print("Choix invalide. Veuillez réessayer.")
-                input("Appuyez sur Entrée pour continuer...")
 
     def launch_first_round(self, tournament):
+        if tournament.first_round_results_recorded:
+            print("Le premier round a déjà été lancé.")
+            input("Appuyez sur Entrée pour continuer...")
+            return
+
         clear_screen()
         print(f"Lancer le premier round du tournoi '{tournament.tournament_id}' :")
 
@@ -69,7 +68,6 @@ class TournamentManagementView:
             input("Appuyez sur Entrée pour continuer...")
             return
 
-        tournament.first_round_launched = True
         new_round = Round(current_round)
         tournament.rounds.append(new_round)
         tournament.rounds[current_round - 1].results_recorded = False
@@ -86,7 +84,7 @@ class TournamentManagementView:
 
         print(f"Les matchs du round {current_round} ont été lancés et enregistrés.")
         input("Appuyez sur Entrée pour continuer...")
-        tournament.first_round_results_recorded = True 
+        tournament.first_round_launched = True
 
     def launch_next_round(self, tournament):
         clear_screen()
@@ -132,7 +130,7 @@ class TournamentManagementView:
         for i in range(0, num_players - 1, 2):
             player1 = players[i]
             player2 = players[i + 1] if i + 1 < num_players else None
-            match = (player1, player2)  # Create a tuple of players
+            match = (player1, player2)  
             matches.append(match)
         
         return matches
