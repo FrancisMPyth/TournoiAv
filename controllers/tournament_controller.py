@@ -5,7 +5,7 @@ import json
 import re
 from datetime import datetime
 from models.tournament import Tournament
-from config import DATA_DIR, TOURNOIS_DIR
+from config import DATA_DIR, TOURNOIS_DIR, GESTION_TOURNOIS_DIR
 
 class TournamentController:
     def __init__(self, player_controller):

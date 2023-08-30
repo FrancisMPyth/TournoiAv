@@ -7,6 +7,8 @@ from tournament_views.PlayerListView import PlayerListView
 from tournament_views.TournamentCreationView import TournamentCreationView
 from tournament_views.TournamentListView import TournamentListView
 from tournament_views.TournamentManagementView import TournamentManagementView
+from config import DATA_DIR, TOURNOIS_DIR, GESTION_TOURNOIS_DIR, JOUEURS_DIR
+
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -69,6 +71,8 @@ def tournament_sub_menu(tournament_management_view, tournament):
 
         if sub_choice == "1":
             if not tournament.first_round_results_recorded:
+                gestion_tournament_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id)
+                os.makedirs(gestion_tournament_dir, exist_ok=True)  # Créer le répertoire du tournoi
                 tournament_management_view.launch_first_round(tournament)
             else:
                 tournament_management_view.launch_next_round(tournament)
@@ -76,6 +80,18 @@ def tournament_sub_menu(tournament_management_view, tournament):
             break
         else:
             print("Choix invalide. Veuillez réessayer.")
+
+def create_tournament_directory(tournament_id):
+    directory_path = os.path.join(DATA_DIR, TOURNOIS_DIR, "gestion", tournament_id)
+    os.makedirs(directory_path, exist_ok=True)
+
+
+def display_registered_players(tournament):
+    print("Liste des joueurs enregistrés :")
+    for player in tournament.players:
+        print(f"Nom : {player.last_name}, Prénom : {player.first_name}, Date de naissance : {player.date_of_birth.strftime('%d/%m/%Y')}")
+    input("Appuyez sur Entrée pour continuer...")
+
 
 if __name__ == "__main__":
     main()
