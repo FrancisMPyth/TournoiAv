@@ -79,7 +79,7 @@ class TournamentManagementView:
 
         round_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds")
         os.makedirs(round_dir, exist_ok=True)
-        round_file = os.path.join(round_dir, f"matches_round_{current_round}.json")
+        round_file = os.path.join(round_dir, f"matchs_round_{current_round}.json")
 
         matches_data = [self.serialize_match_data(idx + 1, match) for idx, match in enumerate(first_round_matches)]
         with open(round_file, "w") as file:
