@@ -65,7 +65,7 @@ def tournament_sub_menu(tournament_management_view, tournament):
         clear_screen()
         print(f"Gestion du tournoi '{tournament.tournament_id}':")
         print("1. Lancer le premier round")
-        print("2. Retour au Menu principal")
+        print("q. Retour au Menu principal")
 
         sub_choice = input("Entrez votre choix : ")
 
@@ -76,7 +76,7 @@ def tournament_sub_menu(tournament_management_view, tournament):
                 tournament_management_view.launch_first_round(tournament)
             else:
                 tournament_management_view.launch_next_round(tournament)
-        elif sub_choice == "2":
+        elif sub_choice == "q":
             break
         else:
             print("Choix invalide. Veuillez réessayer.")

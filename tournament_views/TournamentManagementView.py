@@ -77,9 +77,10 @@ class TournamentManagementView:
 
         first_round_matches = self.create_matches_for_round(selected_players)
 
-        round_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, f"round{current_round}")
+        round_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds")
         os.makedirs(round_dir, exist_ok=True)
-        round_file = os.path.join(round_dir, "first_round_matches.json")
+        round_file = os.path.join(round_dir, f"matchs_round_{current_round}.json")
+
 
         matches_data = [self.serialize_match_data(idx + 1, match) for idx, match in enumerate(first_round_matches)]
         with open(round_file, "w") as file:
@@ -87,7 +88,7 @@ class TournamentManagementView:
 
         print(f"Les matchs du round {current_round} ont été lancés et enregistrés.")
         input("Appuyez sur Entrée pour continuer...")
-        
+
     def launch_next_round(self, tournament):
         clear_screen()
         print(f"Lancer le prochain round du tournoi '{tournament.tournament_id}' :")
@@ -132,7 +133,7 @@ class TournamentManagementView:
         for i in range(0, num_players - 1, 2):
             player1 = players[i]
             player2 = players[i + 1] if i + 1 < num_players else None
-            match = (player1, player2)
+            match = Match(player1, player2)  # Create a Match object
             matches.append(match)
         
         return matches
@@ -286,9 +287,8 @@ class TournamentManagementView:
         
         return matches
 
-    def serialize_match_data(self, match_number, match):
-        player1 = match.player1
-        player2 = match.player2
+    def serialize_match_data(self, match_number, match_tuple):
+        player1, player2 = match_tuple
         player1_name = f"{player1.first_name} {player1.last_name}" if player1 else "BYE"
         player2_name = f"{player2.first_name} {player2.last_name}" if player2 else "BYE"
         
@@ -304,3 +304,4 @@ class TournamentManagementView:
             }
         }
         return match_data
+
