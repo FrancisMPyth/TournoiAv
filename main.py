@@ -1,7 +1,6 @@
 # main.py
+
 import os
-import json
-from datetime import datetime
 from controllers.player_controller import PlayerController
 from controllers.tournament_controller import TournamentController
 from tournament_views.PlayerListView import PlayerListView
@@ -48,14 +47,39 @@ def main():
             if tournament_id.lower() == "q":
                 continue
             tournament = None
-            tournaments = tournament_controller.get_tournaments()
-            for t in tournaments:
+            for t in tournament_controller.get_tournaments():
                 if t.tournament_id == tournament_id:
                     tournament = t
                     break
             if tournament is not None:
-                tournament_management_view.manage_tournament(tournament)
+                tournament_sub_menu(tournament_management_view, tournament)
         elif choice.lower() == "q":
+            break
+        else:
+            print("Choix invalide. Veuillez réessayer.")
+
+def tournament_sub_menu(tournament_management_view, tournament):
+    while True:
+        clear_screen()
+        print(f"Gestion du tournoi '{tournament.tournament_id}':")
+        print("1. Lancer le premier round")
+        print("2. Saisir les résultats des matchs")
+        print("3. Afficher les détails du tournoi")
+        print("4. Retour au Menu principal")
+
+        sub_choice = input("Entrez votre choix : ")
+
+        if sub_choice == "1":
+            if not tournament.first_round_results_recorded:
+                tournament_management_view.launch_first_round(tournament)
+            else:
+                tournament_management_view.launch_next_round(tournament)
+        elif sub_choice == "2":
+            tournament_management_view.record_match_results(tournament)
+        elif sub_choice == "3":
+            tournament_management_view.display_tournament_details(tournament)
+            input("Appuyez sur Entrée pour continuer...")
+        elif sub_choice == "4":
             break
         else:
             print("Choix invalide. Veuillez réessayer.")
