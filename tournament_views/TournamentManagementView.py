@@ -79,8 +79,7 @@ class TournamentManagementView:
 
         round_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds")
         os.makedirs(round_dir, exist_ok=True)
-        round_file = os.path.join(round_dir, f"matchs_round_{current_round}.json")
-
+        round_file = os.path.join(round_dir, f"matches_round_{current_round}.json")
 
         matches_data = [self.serialize_match_data(idx + 1, match) for idx, match in enumerate(first_round_matches)]
         with open(round_file, "w") as file:
@@ -88,6 +87,7 @@ class TournamentManagementView:
 
         print(f"Les matchs du round {current_round} ont été lancés et enregistrés.")
         input("Appuyez sur Entrée pour continuer...")
+        tournament.first_round_results_recorded = True 
 
     def launch_next_round(self, tournament):
         clear_screen()
@@ -133,12 +133,10 @@ class TournamentManagementView:
         for i in range(0, num_players - 1, 2):
             player1 = players[i]
             player2 = players[i + 1] if i + 1 < num_players else None
-            match = Match(player1, player2)  # Create a Match object
+            match = (player1, player2)  # Create a tuple of players
             matches.append(match)
         
         return matches
-
-
 
     def select_players_for_first_round(self, tournament):
         print("Sélectionnez les joueurs pour le premier round (nombre pair) :")
@@ -176,8 +174,6 @@ class TournamentManagementView:
 
         return selected_players
 
-
-
     def record_match_results(self, tournament):
         clear_screen()
         print(f"Saisir les résultats des matchs pour le round en cours :")
@@ -206,87 +202,6 @@ class TournamentManagementView:
         print("Les résultats des matchs ont été enregistrés.")
         input("Appuyez sur Entrée pour continuer...")
 
-    def display_tournament_details(self, tournament):
-        clear_screen()
-        print(f"Identifiant : {tournament.tournament_id}")
-        print(f"Nom : {tournament.name}")
-        input("Appuyez sur Entrée pour continuer...")
-
-    def launch_tournament(self, tournament):
-        clear_screen()
-        print(f"Lancement du premier round du tournoi '{tournament.name}' :")
-
-        if tournament.number_of_rounds == 0:
-            print("Le tournoi n'a pas encore de rounds.")
-            input("Appuyez sur Entrée pour continuer...")
-            return
-
-        if len(tournament.rounds) > 0 and len(tournament.rounds[0]) > 0:
-            print("Le premier round a déjà été lancé.")
-            input("Appuyez sur Entrée pour continuer...")
-            return
-
-        if len(tournament.players) < 2:
-            print("Il n'y a pas suffisamment de joueurs inscrits pour lancer un round.")
-            input("Appuyez sur Entrée pour continuer...")
-            return
-
-    def manage_rounds(self, tournament):
-        while True:
-            clear_screen()
-            print(f"Gestion des matchs du tournoi '{tournament.name}':")
-            print("1. Lancer le premier round")
-            print("2. Saisir les résultats des matchs")
-            print("3. Retour à la gestion du tournoi")
-
-            choice = input("Entrez votre choix : ")
-
-            if choice == "1":
-                self.launch_next_round(tournament)
-            elif choice == "2":
-                self.record_match_results(tournament)
-            elif choice == "3":
-                break
-            else:
-                print("Choix invalide. Veuillez réessayer.")
-                input("Appuyez sur Entrée pour continuer...")
-
-    def launch_next_round(self, tournament):
-        pass
-
-    def record_match_results(self, tournament):
-        pass
-
-        first_round_matches = self.create_matches_for_round(tournament.players)
-
-        round_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "round1")
-        os.makedirs(round_dir, exist_ok=True)
-        round_file = os.path.join(round_dir, "first_round_matches.json")
-
-        matches_data = [self.serialize_match_data(idx + 1, match) for idx, match in enumerate(first_round_matches)]
-        with open(round_file, "w") as file:
-            json.dump(matches_data, file, indent=4)
-
-        print("Les matches du premier round ont été lancés et enregistrés.")
-        input("Appuyez sur Entrée pour continuer...")
-
-    def create_matches_for_round(self, players):
-        num_players = len(players)
-        if num_players < 2:
-            print("Il n'y a pas suffisamment de joueurs pour créer des matchs.")
-            return []
-
-        import random
-        random.shuffle(players)  
-        matches = []
-        for i in range(0, num_players - 1, 2):
-            player1 = players[i]
-            player2 = players[i + 1] if i + 1 < num_players else None
-            match = (player1, player2)
-            matches.append(match)
-        
-        return matches
-
     def serialize_match_data(self, match_number, match_tuple):
         player1, player2 = match_tuple
         player1_name = f"{player1.first_name} {player1.last_name}" if player1 else "BYE"
@@ -304,4 +219,3 @@ class TournamentManagementView:
             }
         }
         return match_data
-

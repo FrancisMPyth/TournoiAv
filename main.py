@@ -60,37 +60,28 @@ def main():
         else:
             print("Choix invalide. Veuillez réessayer.")
 
-def tournament_sub_menu(tournament_management_view, tournament):
-    while True:
-        clear_screen()
-        print(f"Gestion du tournoi '{tournament.tournament_id}':")
-        print("1. Lancer le premier round")
-        print("q. Retour au Menu principal")
-
-        sub_choice = input("Entrez votre choix : ")
-
-        if sub_choice == "1":
+def tournament_sub_menu(self, tournament):
+        while True:
+            clear_screen()
+            print(f"Gestion du tournoi '{tournament.tournament_id}':")
             if not tournament.first_round_results_recorded:
-                gestion_tournament_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id)
-                os.makedirs(gestion_tournament_dir, exist_ok=True)  # Créer le répertoire du tournoi
-                tournament_management_view.launch_first_round(tournament)
+                print("1. Lancer le premier round")
             else:
-                tournament_management_view.launch_next_round(tournament)
-        elif sub_choice == "q":
-            break
-        else:
-            print("Choix invalide. Veuillez réessayer.")
+                print("1. Saisie des résultats")  # Mettre à jour l'affichage ici
+            print("2. Retour au Menu principal")
 
-def create_tournament_directory(tournament_id):
-    directory_path = os.path.join(DATA_DIR, TOURNOIS_DIR, "gestion", tournament_id)
-    os.makedirs(directory_path, exist_ok=True)
+            sub_choice = input("Entrez votre choix : ")
 
-
-def display_registered_players(tournament):
-    print("Liste des joueurs enregistrés :")
-    for player in tournament.players:
-        print(f"Nom : {player.last_name}, Prénom : {player.first_name}, Date de naissance : {player.date_of_birth.strftime('%d/%m/%Y')}")
-    input("Appuyez sur Entrée pour continuer...")
+            if sub_choice == "1":
+                if not tournament.first_round_results_recorded:
+                    self.launch_first_round(tournament)
+                else:
+                    self.record_match_results(tournament)
+            elif sub_choice == "2":
+                break
+            else:
+                print("Choix invalide. Veuillez réessayer.")
+                input("Appuyez sur Entrée pour continuer...")
 
 
 if __name__ == "__main__":
