@@ -63,9 +63,7 @@ def tournament_sub_menu(tournament_management_view, tournament):
         clear_screen()
         print(f"Gestion du tournoi '{tournament.tournament_id}':")
         print("1. Lancer le premier round")
-        print("2. Saisir les résultats des matchs")
-        print("3. Afficher les détails du tournoi")
-        print("4. Retour au Menu principal")
+        print("2. Retour au Menu principal")
 
         sub_choice = input("Entrez votre choix : ")
 
@@ -75,11 +73,6 @@ def tournament_sub_menu(tournament_management_view, tournament):
             else:
                 tournament_management_view.launch_next_round(tournament)
         elif sub_choice == "2":
-            tournament_management_view.record_match_results(tournament)
-        elif sub_choice == "3":
-            tournament_management_view.display_tournament_details(tournament)
-            input("Appuyez sur Entrée pour continuer...")
-        elif sub_choice == "4":
             break
         else:
             print("Choix invalide. Veuillez réessayer.")
