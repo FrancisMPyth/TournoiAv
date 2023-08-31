@@ -37,7 +37,10 @@ class TournamentManagementView:
                     self.launch_next_round(tournament)
 
     def launch_first_round(self, tournament):
-        if tournament.first_round_results_recorded:
+        round_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds")
+        round_file = os.path.join(round_dir, "matchs_round_1.json")
+
+        if os.path.exists(round_file):
             print("Le premier round a déjà été lancé.")
             input("Appuyez sur Entrée pour continuer...")
             return
@@ -256,24 +259,27 @@ class TournamentManagementView:
 
 
 
+
     def tournament_sub_menu(self, tournament):
         while True:
             clear_screen()
             print(f"Gestion du tournoi '{tournament.tournament_id}':")
-            if not tournament.first_round_results_recorded:
-                print("1. Lancer le premier round")
-            else:
+            
+            if os.path.exists(os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds", "matchs_round_1.json")):
                 print("1. Saisie des résultats")
+            else:
+                print("1. Lancer le premier round")
+
             print("2. Afficher le rapport")
             print("3. Retour au Menu principal")
 
             sub_choice = input("Entrez votre choix : ")
 
             if sub_choice == "1":
-                if not tournament.first_round_results_recorded:
-                    self.launch_first_round(tournament)
-                else:
+                if os.path.exists(os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds", "matchs_round_1.json")):
                     self.record_match_results(tournament)
+                else:
+                    self.launch_first_round(tournament)
             elif sub_choice == "2":
                 self.display_report(tournament)
             elif sub_choice == "3":
@@ -281,5 +287,7 @@ class TournamentManagementView:
             else:
                 print("Choix invalide. Veuillez réessayer.")
                 input("Appuyez sur Entrée pour continuer...")
+
+    
 
 
