@@ -9,11 +9,8 @@ from tournament_views.TournamentListView import TournamentListView
 from tournament_views.TournamentManagementView import TournamentManagementView
 from config import DATA_DIR, TOURNOIS_DIR, GESTION_TOURNOIS_DIR, JOUEURS_DIR
 
-
-
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
-
 
 def main():
     player_controller = PlayerController()
@@ -61,7 +58,6 @@ def main():
             break
         else:
             print("Choix invalide. Veuillez réessayer.")
-
 
 if __name__ == "__main__":
     main()
