@@ -17,7 +17,6 @@ class TournamentManagementView:
         self.player_controller = player_controller
         self.current_round = 1 
 
-
     def manage_tournament(self, tournament):
         while True:
             clear_screen()
@@ -37,6 +36,13 @@ class TournamentManagementView:
                     tournament.first_round_launched = True  
                 else:
                     self.launch_next_round(tournament)
+            elif choice == "2":
+                self.record_match_results(tournament)
+            elif choice == "3":
+                break
+            else:
+                print("Choix invalide. Veuillez réessayer.")
+                input("Appuyez sur Entrée pour continuer...")
 
     def launch_first_round(self, tournament):
         round_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds")
@@ -44,15 +50,13 @@ class TournamentManagementView:
         if not os.path.exists(round_dir):
             os.makedirs(round_dir)
 
-        current_round = self.current_round  
+        current_round = len(tournament.rounds) + 1
         tournament.current_round = current_round
 
         if current_round > 4:
             print("Tous les rounds ont déjà été lancés pour ce tournoi.")
             input("Appuyez sur Entrée pour continuer...")
             return
-
-
 
         if current_round > 1 and not tournament.rounds[current_round - 2].results_recorded:
             print("Les résultats du round précédent doivent être enregistrés avant de lancer le prochain round.")
@@ -77,7 +81,8 @@ class TournamentManagementView:
 
         first_round_matches = self.create_matches_for_round(selected_players)
 
-        round_file = os.path.join(round_dir, f"matchs_round_{current_round}.json")
+        round_file = os.path.join(round_dir, f"matchs_round_{current_round - 1}.json")
+
 
         matches_data = [self.serialize_match_data(idx + 1, match) for idx, match in enumerate(first_round_matches)]
         with open(round_file, "w") as file:
@@ -86,9 +91,6 @@ class TournamentManagementView:
         print(f"Le fichier du premier round a été créé : matchs_round_{current_round}.json")
         input("Appuyez sur Entrée pour continuer...")
         tournament.first_round_launched = True
-
-        self.current_round += 1  
-
 
     def launch_next_round(self, tournament):
         clear_screen()
@@ -174,7 +176,6 @@ class TournamentManagementView:
                 print("Choix invalide. Veuillez entrer un numéro valide.")
 
         return selected_players
-    
 
     def display_current_round_matches_from_file(self, tournament):
         clear_screen()
@@ -203,19 +204,17 @@ class TournamentManagementView:
             print(f"Joueur 2: {player2_name}")
             print()
 
-
     def record_match_results(self, tournament):
         clear_screen()
         print(f"Saisir les résultats des matchs pour le round en cours :")
 
         current_round = len(tournament.rounds)
 
-        print("Numéro du round en cours:", current_round)
+        print("Numéro du round en cours:", current_round + 1)
         round_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds")
-        round_file = os.path.join(round_dir, f"matchs_round_{current_round}.json")
+        round_file = os.path.join(round_dir, f"matchs_round_{current_round + 1}.json")  
         print("Chemin du fichier JSON:", round_file)
 
-        # Charger les matchs à partir du fichier JSON s'il existe
         if os.path.exists(round_file):
             with open(round_file, "r") as file:
                 matches_data = json.load(file)
@@ -238,11 +237,10 @@ class TournamentManagementView:
 
             print("Les résultats des matchs ont été enregistrés.")
         else:
+           
             print("Aucun match n'a été créé pour ce round.")
 
         input("Appuyez sur Entrée pour continuer...")
-
-
 
     def serialize_match_data(self, match_number, match_tuple):
         player1, player2 = match_tuple
@@ -261,7 +259,6 @@ class TournamentManagementView:
             }
         }
         return match_data
-    
 
     def display_report(self, tournament):
         clear_screen()
@@ -299,9 +296,6 @@ class TournamentManagementView:
 
         input("\nAppuyez sur Entrée pour continuer...")
 
-
-
-
     def tournament_sub_menu(self, tournament):
         while True:
             clear_screen()
@@ -329,7 +323,3 @@ class TournamentManagementView:
             else:
                 print("Choix invalide. Veuillez réessayer.")
                 input("Appuyez sur Entrée pour continuer...")
-
-    
-
-
