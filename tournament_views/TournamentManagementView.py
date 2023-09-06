@@ -2,7 +2,7 @@
 
 import json
 import os
-import datetime
+from datetime import datetime
 from config import GESTION_TOURNOIS_DIR
 from models.round import Round
 from models.player import Player
@@ -81,7 +81,7 @@ class TournamentManagementView:
         new_round = Round(current_round)
 
         # Capturez l'heure actuelle et enregistrez-la comme l'heure de début du round
-        new_round.start_time = datetime.datetime.now()
+        new_round.start_time = datetime.now()
 
         tournament.rounds.append(new_round)
         tournament.rounds[current_round - 1].results_recorded = False
@@ -235,11 +235,15 @@ class TournamentManagementView:
 
                         print(f"Résultat enregistré pour {player1_name} : {player1_points}")
                         print(f"Résultat enregistré pour {player2_name} : {player2_points}")
+
+                        matches_data[match_number - 1]["Heure_fin"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        
                         break
                     except ValueError:
                         print("Veuillez entrer un résultat valide (P/G/N).")
 
-            tournament.rounds[current_round - 1].end_time = datetime.datetime.now()
+            tournament.rounds[current_round - 1].end_time = datetime.now()
+
 
             with open(round_file, "w") as file:
                 json.dump(matches_data, file, indent=4)

@@ -1,5 +1,7 @@
 # main.py
 
+
+
 import os
 from controllers.player_controller import PlayerController
 from controllers.tournament_controller import TournamentController
@@ -8,6 +10,11 @@ from tournament_views.TournamentCreationView import TournamentCreationView
 from tournament_views.TournamentListView import TournamentListView
 from tournament_views.TournamentManagementView import TournamentManagementView
 from config import DATA_DIR, TOURNOIS_DIR, GESTION_TOURNOIS_DIR, JOUEURS_DIR
+
+
+
+
+
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
