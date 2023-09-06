@@ -2,7 +2,7 @@
 
 import json
 import os
-from datetime import datetime
+from datetime import datetime 
 from config import GESTION_TOURNOIS_DIR
 from models.round import Round
 from models.player import Player
@@ -59,28 +59,25 @@ class TournamentManagementView:
         if current_round > 4:
             print("Tous les rounds ont déjà été lancés pour ce tournoi.")
             input("Appuyez sur Entrée pour continuer...")
-            return current_round  # Renvoie la valeur actuelle de current_round
-
+            return current_round  
         if current_round > 1 and not tournament.rounds[current_round - 2].results_recorded:
             print("Les résultats du round précédent doivent être enregistrés avant de lancer le prochain round.")
             input("Appuyez sur Entrée pour continuer...")
-            return current_round  # Renvoie la valeur actuelle de current_round
+            return current_round  
 
         selected_players = self.select_players_for_first_round(tournament)
 
         if len(selected_players) < 2:
             print("Il n'y a pas suffisamment de joueurs inscrits pour lancer un round.")
             input("Appuyez sur Entrée pour continuer...")
-            return current_round  # Renvoie la valeur actuelle de current_round
-
+            return current_round  
         if len(selected_players) % 2 != 0:
             print("Le nombre de joueurs doit être pair pour former des matchs.")
             input("Appuyez sur Entrée pour continuer...")
-            return current_round  # Renvoie la valeur actuelle de current_round
+            return current_round  
 
         new_round = Round(current_round)
 
-        # Capturez l'heure actuelle et enregistrez-la comme l'heure de début du round
         new_round.start_time = datetime.now()
 
         tournament.rounds.append(new_round)
