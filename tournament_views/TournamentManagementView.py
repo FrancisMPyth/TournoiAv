@@ -221,17 +221,16 @@ class TournamentManagementView:
                             player1_points = 0.5
                             player2_points = 0.5
 
-                        # Utilisez match_number - 1 pour accéder au match correspondant dans la liste
                         matches_data[match_number - 1]["player1"]["result"] = player1_points
                         matches_data[match_number - 1]["player2"]["result"] = player2_points
                         
                         print(f"Résultat enregistré pour {player1_name} : {player1_points}")
                         print(f"Résultat enregistré pour {player2_name} : {player2_points}")
-                        break  # Sortir de la boucle après avoir saisi et enregistré un résultat valide
+                        break  
                     except ValueError:
                         print("Veuillez entrer un résultat valide (P/G/N).")
 
-            # Après avoir saisi les résultats de tous les matchs, enregistrez les données mises à jour dans le fichier JSON
+           
             with open(round_file, "w") as file:
                 json.dump(matches_data, file, indent=4)
 
@@ -240,9 +239,6 @@ class TournamentManagementView:
             print("Aucun match n'a été créé pour ce round.")
 
         input("Appuyez sur Entrée pour continuer...")
-
-
-
 
 
     def serialize_match_data(self, match_number, match_tuple):
