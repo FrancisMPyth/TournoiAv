@@ -2,6 +2,7 @@
 
 import json
 import os
+import datetime
 from config import GESTION_TOURNOIS_DIR
 from models.round import Round
 from models.player import Player
@@ -58,26 +59,30 @@ class TournamentManagementView:
         if current_round > 4:
             print("Tous les rounds ont déjà été lancés pour ce tournoi.")
             input("Appuyez sur Entrée pour continuer...")
-            return
+            return current_round  # Renvoie la valeur actuelle de current_round
 
         if current_round > 1 and not tournament.rounds[current_round - 2].results_recorded:
             print("Les résultats du round précédent doivent être enregistrés avant de lancer le prochain round.")
             input("Appuyez sur Entrée pour continuer...")
-            return
+            return current_round  # Renvoie la valeur actuelle de current_round
 
         selected_players = self.select_players_for_first_round(tournament)
 
         if len(selected_players) < 2:
             print("Il n'y a pas suffisamment de joueurs inscrits pour lancer un round.")
             input("Appuyez sur Entrée pour continuer...")
-            return
+            return current_round  # Renvoie la valeur actuelle de current_round
 
         if len(selected_players) % 2 != 0:
             print("Le nombre de joueurs doit être pair pour former des matchs.")
             input("Appuyez sur Entrée pour continuer...")
-            return
+            return current_round  # Renvoie la valeur actuelle de current_round
 
         new_round = Round(current_round)
+
+        # Capturez l'heure actuelle et enregistrez-la comme l'heure de début du round
+        new_round.start_time = datetime.datetime.now()
+
         tournament.rounds.append(new_round)
         tournament.rounds[current_round - 1].results_recorded = False
 
@@ -92,6 +97,10 @@ class TournamentManagementView:
         print(f"Le fichier du premier round a été créé : matchs_round_{current_round}.json")
         input("Appuyez sur Entrée pour continuer...")
         tournament.first_round_launched = True
+
+        return current_round
+
+
 
     def create_matches_for_round(self, players):
         num_players = len(players)
@@ -201,7 +210,7 @@ class TournamentManagementView:
                 print(f"Match {match_number}:")
                 print(f"Joueur 1: {player1_name}")
                 print(f"Joueur 2: {player2_name}")
-                
+
                 while True:
                     try:
                         score_player1 = input(f"Résultat pour {player1_name} (P/G/N): ").upper()
@@ -223,14 +232,15 @@ class TournamentManagementView:
 
                         matches_data[match_number - 1]["player1"]["result"] = player1_points
                         matches_data[match_number - 1]["player2"]["result"] = player2_points
-                        
+
                         print(f"Résultat enregistré pour {player1_name} : {player1_points}")
                         print(f"Résultat enregistré pour {player2_name} : {player2_points}")
-                        break  
+                        break
                     except ValueError:
                         print("Veuillez entrer un résultat valide (P/G/N).")
 
-           
+            tournament.rounds[current_round - 1].end_time = datetime.datetime.now()
+
             with open(round_file, "w") as file:
                 json.dump(matches_data, file, indent=4)
 
@@ -239,26 +249,6 @@ class TournamentManagementView:
             print("Aucun match n'a été créé pour ce round.")
 
         input("Appuyez sur Entrée pour continuer...")
-
-
-    def serialize_match_data(self, match_number, match_tuple):
-            player1, player2 = match_tuple
-            player1_name = f"{player1.first_name} {player1.last_name}" if player1 else "BYE"
-            player2_name = f"{player2.first_name} {player2.last_name}" if player2 else "BYE"
-            
-            match_data = {
-                "match_number": match_number,
-                "player1": {
-                    "name": player1_name,
-                    "chess_id": player1.chess_id if player1 else ""
-                },
-                "player2": {
-                    "name": player2_name,
-                    "chess_id": player2.chess_id if player2 else ""
-                }
-            }
-            return match_data
-
 
     def display_report(self, tournament):
             clear_screen()
@@ -297,13 +287,15 @@ class TournamentManagementView:
             input("\nAppuyez sur Entrée pour continuer...")
 
     def tournament_sub_menu(self, tournament):
+        current_round = len(tournament.rounds) + 1  
+        
         while True:
             clear_screen()
             print(f"Gestion du tournoi '{tournament.tournament_id}':")
             
-            current_round = len(tournament.rounds) + 1  
+            round_file_exists = os.path.exists(os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds", f"matchs_round_{current_round}.json"))
             
-            if os.path.exists(os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds", f"matchs_round_{current_round}.json")):
+            if round_file_exists:
                 print("1. Saisie des résultats")
             else:
                 print("1. Lancer le premier round")
@@ -314,10 +306,10 @@ class TournamentManagementView:
             sub_choice = input("Entrez votre choix : ")
 
             if sub_choice == "1":
-                if os.path.exists(os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds", f"matchs_round_{current_round}.json")):
-                    self.record_match_results(tournament, current_round) 
+                if round_file_exists:
+                    current_round = self.record_match_results(tournament, current_round)
                 else:
-                    self.launch_first_round(tournament)
+                    current_round = self.launch_first_round(tournament)
             elif sub_choice == "2":
                 self.display_report(tournament)
             elif sub_choice == "3":
@@ -325,3 +317,23 @@ class TournamentManagementView:
             else:
                 print("Choix invalide. Veuillez réessayer.")
                 input("Appuyez sur Entrée pour continuer...")
+
+        return current_round 
+    
+    def serialize_match_data(self, match_number, match_tuple):
+        player1, player2 = match_tuple
+        player1_name = f"{player1.first_name} {player1.last_name}" if player1 else "BYE"
+        player2_name = f"{player2.first_name} {player2.last_name}" if player2 else "BYE"
+
+        match_data = {
+            "match_number": match_number,
+            "player1": {
+                "name": player1_name,
+                "chess_id": player1.chess_id if player1 else ""
+            },
+            "player2": {
+                "name": player2_name,
+                "chess_id": player2.chess_id if player2 else ""
+            }
+        }
+        return match_data

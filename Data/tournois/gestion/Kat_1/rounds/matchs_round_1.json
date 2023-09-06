@@ -15,13 +15,13 @@
     {
         "match_number": 2,
         "player1": {
-            "name": "Vlad Premier",
-            "chess_id": "J007",
+            "name": "Gustave Eiffel",
+            "chess_id": "J002",
             "result": 0.5
         },
         "player2": {
-            "name": "Gustave Eiffel",
-            "chess_id": "J002",
+            "name": "Vlad Premier",
+            "chess_id": "J007",
             "result": 0.5
         }
     },
@@ -30,24 +30,24 @@
         "player1": {
             "name": "Bernard Phil",
             "chess_id": "J006",
-            "result": 1
+            "result": 0.5
         },
         "player2": {
-            "name": "Pierro Fou",
-            "chess_id": "J008",
-            "result": 0
+            "name": "Adolphe Petti",
+            "chess_id": "J004",
+            "result": 0.5
         }
     },
     {
         "match_number": 4,
         "player1": {
-            "name": "Adolphe Petti",
-            "chess_id": "J004",
+            "name": "Ema Mac",
+            "chess_id": "J005",
             "result": 0.5
         },
         "player2": {
-            "name": "Ema Mac",
-            "chess_id": "J005",
+            "name": "Pierro Fou",
+            "chess_id": "J008",
             "result": 0.5
         }
     }
