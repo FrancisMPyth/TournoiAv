@@ -227,22 +227,53 @@ class TournamentManagementView:
                         matches_data[match_number - 1]["player1"]["result"] = player1_points
                         matches_data[match_number - 1]["player2"]["result"] = player2_points
 
+                        matches_data[match_number - 1]["Heure_fin"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                        director_notes = input("Remarques de la direction (appuyez sur Entrée pour ignorer) : ")
+                        if director_notes:
+                            matches_data[match_number - 1]["director_notes"] = director_notes
+
                         print(f"Résultat enregistré pour {player1_name} : {player1_points}")
                         print(f"Résultat enregistré pour {player2_name} : {player2_points}")
 
-                        matches_data[match_number - 1]["Heure_fin"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        
                         break
                     except ValueError:
                         print("Veuillez entrer un résultat valide (P/G/N).")
 
             tournament.rounds[current_round - 1].end_time = datetime.now()
 
-
             with open(round_file, "w") as file:
                 json.dump(matches_data, file, indent=4)
 
             print("Les résultats des matchs ont été enregistrés.")
+        else:
+            print("Aucun match n'a été créé pour ce round.")
+
+        input("Appuyez sur Entrée pour continuer...")
+
+
+
+    def record_director_notes(self, tournament, current_round):
+        clear_screen()
+        print(f"Saisir les remarques de la direction pour le round en cours :")
+
+        print("Numéro du round en cours:", current_round)
+        round_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds")
+        round_file = os.path.join(round_dir, f"matchs_round_{current_round}.json")
+        print("Chemin du fichier JSON:", round_file)
+
+        if os.path.exists(round_file):
+            director_notes = input("Remarques de la direction : ")
+
+            tournament.rounds[current_round - 1].director_notes = director_notes
+
+            with open(round_file, "r") as file:
+                matches_data = json.load(file)
+
+            with open(round_file, "w") as file:
+                json.dump(matches_data, file, indent=4)
+
+            print("Les remarques de la direction ont été enregistrées.")
         else:
             print("Aucun match n'a été créé pour ce round.")
 
@@ -294,7 +325,11 @@ class TournamentManagementView:
             round_file_exists = os.path.exists(os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds", f"matchs_round_{current_round}.json"))
             
             if round_file_exists:
-                print("1. Saisie des résultats")
+                current_round_obj = tournament.rounds[current_round - 1]
+                if not current_round_obj.director_notes:
+                    print("1. Saisie des résultats")
+                else:
+                    print("1. Remarques Direction")
             else:
                 print("1. Lancer le premier round")
 
@@ -305,7 +340,11 @@ class TournamentManagementView:
 
             if sub_choice == "1":
                 if round_file_exists:
-                    current_round = self.record_match_results(tournament, current_round)
+                    current_round_obj = tournament.rounds[current_round - 1]
+                    if not current_round_obj.director_notes:
+                        current_round = self.record_match_results(tournament, current_round)
+                    else:
+                        self.record_director_notes(tournament, current_round)
                 else:
                     current_round = self.launch_first_round(tournament)
             elif sub_choice == "2":
@@ -316,7 +355,8 @@ class TournamentManagementView:
                 print("Choix invalide. Veuillez réessayer.")
                 input("Appuyez sur Entrée pour continuer...")
 
-        return current_round 
+        return current_round
+
     
     def serialize_match_data(self, match_number, match_tuple, start_time):
         player1, player2 = match_tuple

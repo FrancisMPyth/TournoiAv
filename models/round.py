@@ -9,6 +9,7 @@ class Round:
         self.matches = []
         self.completed = False
         self.start_time = start_time if start_time is not None else datetime.now()
+        self.director_notes = ""  
 
     def add_match(self, match):
         self.matches.append(match)
