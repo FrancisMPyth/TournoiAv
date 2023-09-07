@@ -316,16 +316,20 @@ class TournamentManagementView:
             input("\nAppuyez sur Entrée pour continuer...")
 
     def tournament_sub_menu(self, tournament):
-        current_round = len(tournament.rounds) + 1  
-        
         while True:
             clear_screen()
-            print(f"Gestion du tournoi '{tournament.tournament_id}':")
+            current_round = len(tournament.rounds) + 1
+
+            print("Valeur de current_round:", current_round)
             
+            print(f"Gestion du tournoi '{tournament.tournament_id}':")
             round_file_exists = os.path.exists(os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds", f"matchs_round_{current_round}.json"))
             
-            if round_file_exists:
+            if round_file_exists and current_round <= len(tournament.rounds):
                 current_round_obj = tournament.rounds[current_round - 1]
+
+                print("Longueur de tournament.rounds:", len(tournament.rounds))
+
                 if not current_round_obj.director_notes:
                     print("1. Saisie des résultats")
                 else:
@@ -339,7 +343,7 @@ class TournamentManagementView:
             sub_choice = input("Entrez votre choix : ")
 
             if sub_choice == "1":
-                if round_file_exists:
+                if round_file_exists and current_round <= len(tournament.rounds):
                     current_round_obj = tournament.rounds[current_round - 1]
                     if not current_round_obj.director_notes:
                         current_round = self.record_match_results(tournament, current_round)
@@ -356,6 +360,8 @@ class TournamentManagementView:
                 input("Appuyez sur Entrée pour continuer...")
 
         return current_round
+
+
 
     
     def serialize_match_data(self, match_number, match_tuple, start_time):
