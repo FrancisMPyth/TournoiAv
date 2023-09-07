@@ -1,12 +1,8 @@
-# TournamentManagementView.py
-
 import json
 import os
 from datetime import datetime 
 from config import GESTION_TOURNOIS_DIR
 from models.round import Round
-from models.player import Player
-from models.match import Match
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -16,6 +12,7 @@ class TournamentManagementView:
     def __init__(self, tournament_controller, player_controller):
         self.tournament_controller = tournament_controller
         self.player_controller = player_controller
+        self.current_round = 1  
 
     def manage_tournament(self, tournament):
         while True:
@@ -36,9 +33,9 @@ class TournamentManagementView:
 
             if sub_choice == "1":
                 if os.path.exists(os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds", f"matchs_round_{current_round}.json")):
-                    self.record_match_results(tournament, current_round) 
+                    current_round = self.record_match_results(tournament, current_round) 
                 else:
-                    self.launch_first_round(tournament)
+                    current_round = self.launch_first_round(tournament)
             elif sub_choice == "2":
                 self.display_report(tournament)
             elif sub_choice == "3":
@@ -63,7 +60,7 @@ class TournamentManagementView:
         if current_round > 1 and not tournament.rounds[current_round - 2].results_recorded:
             print("Les résultats du round précédent doivent être enregistrés avant de lancer le prochain round.")
             input("Appuyez sur Entrée pour continuer...")
-            return current_round  
+            return current_round    
 
         selected_players = self.select_players_for_first_round(tournament)
 
@@ -92,9 +89,9 @@ class TournamentManagementView:
         print(f"Le fichier du premier round a été créé : matchs_round_{current_round}.json")
         input("Appuyez sur Entrée pour continuer...")
         tournament.first_round_launched = True
+        self.current_round = current_round + 1
 
         return current_round
-
 
     def create_matches_for_round(self, players):
         num_players = len(players)
@@ -251,106 +248,45 @@ class TournamentManagementView:
 
         input("Appuyez sur Entrée pour continuer...")
 
+        return current_round  
 
-
-    def record_director_notes(self, tournament, current_round):
-        clear_screen()
-        print(f"Saisir les remarques de la direction pour le round en cours :")
-
-        print("Numéro du round en cours:", current_round)
-        round_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds")
-        round_file = os.path.join(round_dir, f"matchs_round_{current_round}.json")
-        print("Chemin du fichier JSON:", round_file)
-
-        if os.path.exists(round_file):
-            director_notes = input("Remarques de la direction : ")
-
-            tournament.rounds[current_round - 1].director_notes = director_notes
-
-            with open(round_file, "r") as file:
-                matches_data = json.load(file)
-
-            with open(round_file, "w") as file:
-                json.dump(matches_data, file, indent=4)
-
-            print("Les remarques de la direction ont été enregistrées.")
-        else:
-            print("Aucun match n'a été créé pour ce round.")
-
-        input("Appuyez sur Entrée pour continuer...")
-
-    def display_report(self, tournament):
-            clear_screen()
-            current_round = len(tournament.rounds)
-
-            round_dir = os.path.join(os.path.abspath(GESTION_TOURNOIS_DIR), tournament.tournament_id, "rounds")
-
-            print(f"Contenu du répertoire des rounds : {round_dir}\n")
-
-            files_in_rounds = os.listdir(round_dir)
-            if not files_in_rounds:
-                print("Aucun fichier trouvé dans le répertoire des rounds.")
-            else:
-                for idx, filename in enumerate(files_in_rounds, start=1):
-                    print(f"{idx}. {filename}")
-
-                choice = input("\nEntrez le numéro du fichier à afficher (ou 'q' pour quitter) : ")
-                if choice.lower() == 'q':
-                    return
-                
-                try:
-                    file_idx = int(choice) - 1
-                    if 0 <= file_idx < len(files_in_rounds):
-                        selected_file = files_in_rounds[file_idx]
-                        file_path = os.path.join(round_dir, selected_file)
-                        print(f"Affichage du contenu du fichier : {selected_file}\n")
-                        
-                        with open(file_path, "r") as file:
-                            file_content = file.read()
-                            print(file_content)
-                    else:
-                        print("Choix invalide. Veuillez entrer un numéro valide.")
-                except ValueError:
-                    print("Choix invalide. Veuillez entrer un numéro valide.")
-
-            input("\nAppuyez sur Entrée pour continuer...")
 
     def tournament_sub_menu(self, tournament):
         while True:
             clear_screen()
-            current_round = len(tournament.rounds) + 1
+            current_round = len(tournament.rounds)
 
-            print("Valeur de current_round:", current_round)
+            print(f"Valeur de current_round: {current_round}")
             
             print(f"Gestion du tournoi '{tournament.tournament_id}':")
-            round_file_exists = os.path.exists(os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds", f"matchs_round_{current_round}.json"))
             
-            if round_file_exists and current_round <= len(tournament.rounds):
+            if current_round >= 1 and current_round <= tournament.number_of_rounds:
                 current_round_obj = tournament.rounds[current_round - 1]
-
-                print("Longueur de tournament.rounds:", len(tournament.rounds))
-
-                if not current_round_obj.director_notes:
+                if not current_round_obj.results_recorded:
                     print("1. Saisie des résultats")
                 else:
                     print("1. Remarques Direction")
-            else:
+            elif current_round == 0:
                 print("1. Lancer le premier round")
+            else:
+                print("1. Lancer le prochain round")
 
             print("2. Afficher le rapport")
             print("3. Retour au Menu principal")
 
             sub_choice = input("Entrez votre choix : ")
-
+            
             if sub_choice == "1":
-                if round_file_exists and current_round <= len(tournament.rounds):
+                if current_round >= 1 and current_round <= tournament.number_of_rounds:
                     current_round_obj = tournament.rounds[current_round - 1]
-                    if not current_round_obj.director_notes:
+                    if not current_round_obj.results_recorded:
                         current_round = self.record_match_results(tournament, current_round)
                     else:
                         self.record_director_notes(tournament, current_round)
-                else:
+                elif current_round == 0:
                     current_round = self.launch_first_round(tournament)
+                else:
+                    current_round = self.launch_next_round(tournament)
             elif sub_choice == "2":
                 self.display_report(tournament)
             elif sub_choice == "3":
@@ -363,7 +299,6 @@ class TournamentManagementView:
 
 
 
-    
     def serialize_match_data(self, match_number, match_tuple, start_time):
         player1, player2 = match_tuple
         player1_name = f"{player1.first_name} {player1.last_name}" if player1 else "BYE"
@@ -382,4 +317,3 @@ class TournamentManagementView:
             "Heure_debut": start_time.strftime("%Y-%m-%d %H:%M:%S")  
         }
         return match_data
-
