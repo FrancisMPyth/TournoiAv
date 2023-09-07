@@ -76,9 +76,7 @@ class TournamentManagementView:
             input("Appuyez sur Entrée pour continuer...")
             return current_round  
 
-        new_round = Round(current_round)
-
-        new_round.start_time = datetime.now()
+        new_round = Round(current_round, start_time=datetime.now())  
 
         tournament.rounds.append(new_round)
         tournament.rounds[current_round - 1].results_recorded = False
@@ -87,7 +85,7 @@ class TournamentManagementView:
 
         round_file = os.path.join(round_dir, f"matchs_round_{current_round}.json")
 
-        matches_data = [self.serialize_match_data(idx + 1, match) for idx, match in enumerate(first_round_matches)]
+        matches_data = [self.serialize_match_data(idx + 1, match, new_round.start_time) for idx, match in enumerate(first_round_matches)]
         with open(round_file, "w") as file:
             json.dump(matches_data, file, indent=4)
 
@@ -96,7 +94,6 @@ class TournamentManagementView:
         tournament.first_round_launched = True
 
         return current_round
-
 
 
     def create_matches_for_round(self, players):
@@ -321,7 +318,7 @@ class TournamentManagementView:
 
         return current_round 
     
-    def serialize_match_data(self, match_number, match_tuple):
+    def serialize_match_data(self, match_number, match_tuple, start_time):
         player1, player2 = match_tuple
         player1_name = f"{player1.first_name} {player1.last_name}" if player1 else "BYE"
         player2_name = f"{player2.first_name} {player2.last_name}" if player2 else "BYE"
@@ -335,6 +332,8 @@ class TournamentManagementView:
             "player2": {
                 "name": player2_name,
                 "chess_id": player2.chess_id if player2 else ""
-            }
+            },
+            "Heure_debut": start_time.strftime("%Y-%m-%d %H:%M:%S")  
         }
         return match_data
+
