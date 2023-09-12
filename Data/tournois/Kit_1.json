@@ -1,0 +1,18 @@
+{
+    "tournament_id": "Kit_2",
+    "name": "Kit",
+    "location": "Paris",
+    "start_date": "28/12/2023",
+    "end_date": "28/12/2023",
+    "number_of_rounds": 4,
+    "players": [
+        "J001",
+        "J002",
+        "J003",
+        "J004",
+        "J005",
+        "J006",
+        "J007",
+        "J008"
+    ]
+}

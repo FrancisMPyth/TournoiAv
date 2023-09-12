@@ -8,11 +8,12 @@ class TournamentCreationView:
         self.player_controller = player_controller
 
     def create_tournament(self):
-        name = input("Nom du tournoi : ")
-        location = input("Lieu : ")
-        start_date_str = input("Date de début (format jj/mm/aaaa) : ")
-        end_date_str = input("Date de fin (format jj/mm/aaaa) : ")
-        number_of_rounds = int(input("Nombre de rounds : "))
+
+        name = input("Entrez le nom du tournoi : ")
+        location = input("Entrez l'emplacement du tournoi : ")
+        start_date_str = input("Entrez la date de début (au format JJ/MM/AAAA) : ")
+        end_date_str = input("Entrez la date de fin (au format JJ/MM/AAAA) : ")
+        number_of_rounds = int(input("Entrez le nombre de rounds : "))
 
         try:
             start_date = datetime.strptime(start_date_str, "%d/%m/%Y")
@@ -59,6 +60,10 @@ class TournamentCreationView:
             print("Aucun joueur sélectionné pour le tournoi.")
             return
 
-        self.tournament_controller.create_tournament(name, location, start_date_str, end_date_str, number_of_rounds, selected_players)
+        tournament_id = self.tournament_controller.generate_tournament_id(name)
+        self.tournament_controller.create_tournament(
+            name, location, start_date_str, end_date_str, number_of_rounds, selected_players
+        )
+
 
         print(f"Le tournoi '{name}' a été enregistré.")

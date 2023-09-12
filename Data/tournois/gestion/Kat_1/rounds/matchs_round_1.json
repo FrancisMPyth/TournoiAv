@@ -2,64 +2,49 @@
     {
         "match_number": 1,
         "player1": {
-            "name": "L\u00e9on Po",
-            "chess_id": "J003",
-            "result": 0.5
+            "name": "Pierro Fou",
+            "chess_id": "J008"
         },
         "player2": {
-            "name": "Pierro Fou",
-            "chess_id": "J008",
-            "result": 0.5
+            "name": "Bernard Phil",
+            "chess_id": "J006"
         },
-        "Heure_debut": "2023-09-07 23:15:37",
-        "Heure_fin": "2023-09-07 23:15:49"
+        "Heure_debut": "2023-09-12 12:36:18"
     },
     {
         "match_number": 2,
         "player1": {
-            "name": "Bernard Phil",
-            "chess_id": "J006",
-            "result": 0.5
+            "name": "Francis Meterfi",
+            "chess_id": "J001"
         },
         "player2": {
-            "name": "Ema Mac",
-            "chess_id": "J005",
-            "result": 0.5
+            "name": "Gustave Eiffel",
+            "chess_id": "J002"
         },
-        "Heure_debut": "2023-09-07 23:15:37",
-        "Heure_fin": "2023-09-07 23:15:53",
-        "director_notes": "ok"
+        "Heure_debut": "2023-09-12 12:36:18"
     },
     {
         "match_number": 3,
         "player1": {
-            "name": "Adolphe Petti",
-            "chess_id": "J004",
-            "result": 0.5
+            "name": "Ema Mac",
+            "chess_id": "J005"
         },
         "player2": {
-            "name": "Gustave Eiffel",
-            "chess_id": "J002",
-            "result": 0.5
+            "name": "L\u00e9on Po",
+            "chess_id": "J003"
         },
-        "Heure_debut": "2023-09-07 23:15:37",
-        "Heure_fin": "2023-09-07 23:16:01",
-        "director_notes": "ok"
+        "Heure_debut": "2023-09-12 12:36:18"
     },
     {
         "match_number": 4,
         "player1": {
             "name": "Vlad Premier",
-            "chess_id": "J007",
-            "result": 0.5
+            "chess_id": "J007"
         },
         "player2": {
-            "name": "Francis Meterfi",
-            "chess_id": "J001",
-            "result": 0.5
+            "name": "Adolphe Petti",
+            "chess_id": "J004"
         },
-        "Heure_debut": "2023-09-07 23:15:37",
-        "Heure_fin": "2023-09-07 23:16:09",
-        "director_notes": "ok"
+        "Heure_debut": "2023-09-12 12:36:18"
     }
 ]

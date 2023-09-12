@@ -1,7 +1,5 @@
 # main.py
 
-
-
 import os
 from controllers.player_controller import PlayerController
 from controllers.tournament_controller import TournamentController
@@ -11,18 +9,12 @@ from tournament_views.TournamentListView import TournamentListView
 from tournament_views.TournamentManagementView import TournamentManagementView
 from config import DATA_DIR, TOURNOIS_DIR, GESTION_TOURNOIS_DIR, JOUEURS_DIR
 
-
-
-
-
-
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def main():
     player_controller = PlayerController()
     tournament_controller = TournamentController(player_controller)
-
     player_list_view = PlayerListView()
     tournament_creation_view = TournamentCreationView(tournament_controller, player_controller)
     tournament_list_view = TournamentListView()
@@ -48,7 +40,6 @@ def main():
             tournament_creation_view.create_tournament()
         elif choice == "4":
             tournament_list_view.display_tournaments(tournament_controller)
-            input("Appuyez sur une touche pour continuer...")
         elif choice == "5":
             tournament_list_view.display_tournaments(tournament_controller)
             tournament_id = input("Spécifiez l'identifiant du tournoi à gérer ('q' pour quitter) : ")
@@ -60,11 +51,13 @@ def main():
                     tournament = t
                     break
             if tournament is not None:
-                tournament_management_view.tournament_sub_menu(tournament)  
+                tournament_management_view.tournament_sub_menu(tournament)
         elif choice.lower() == "q":
             break
         else:
             print("Choix invalide. Veuillez réessayer.")
+        input("Appuyez sur Entrée pour continuer...")
+
 
 if __name__ == "__main__":
     main()
