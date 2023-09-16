@@ -17,8 +17,6 @@ class TournamentController:
         self.player_controller = player_controller
         self.tournaments = self.load_tournaments_from_file()
 
-
-
     def generate_tournament_id(self, name):
         tournament_count = len(self.tournaments)
         name_with_number = f"{name}_{tournament_count + 1}"
@@ -37,7 +35,7 @@ class TournamentController:
         return tournament
 
     def get_tournaments(self):
-            return self.tournaments
+        return self.tournaments
 
     def load_tournaments_from_file(self):
         tournaments = []
@@ -75,7 +73,6 @@ class TournamentController:
         players = [self.player_controller.get_player_by_id(player_id) for player_id in players_ids]
         return [player for player in players if player is not None]
 
-    
     def serialize_tournament(self, tournament):
         players_ids = [player.chess_id for player in tournament.players]
         tournament_data = {
@@ -113,5 +110,4 @@ class TournamentController:
 
             tournament_data = self.serialize_tournament(tournament)
             with open(filepath, "w") as file:
-                json.dump(tournament_data, file, indent=4, default=datetime_to_string)  
-
+                json.dump(tournament_data, file, indent=4, default=datetime_to_string)

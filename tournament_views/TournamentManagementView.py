@@ -62,7 +62,7 @@ class TournamentManagementView:
         current_round = len(tournament.rounds) + 1
         tournament.current_round = current_round
 
-        if current_round > 4:
+        if current_round > tournament.number_of_rounds:
             print("Tous les rounds ont déjà été lancés pour ce tournoi.")
             input("Appuyez sur Entrée pour continuer...")
             return current_round
@@ -82,6 +82,8 @@ class TournamentManagementView:
         round_file = os.path.join(round_dir, f"matchs_round_{current_round}.json")
 
         matches_data = [self.serialize_match_data(idx + 1, match, new_round.start_time) for idx, match in enumerate(selected_players)]
+        matches_data[0]["tournament_id"] = tournament.tournament_id
+
         with open(round_file, "w") as file:
             json.dump(matches_data, file, indent=4)
 
@@ -91,6 +93,7 @@ class TournamentManagementView:
         self.current_round = current_round
 
         return current_round
+
 
     def create_matches_for_round(self, tournament):
         num_players = len(tournament.selected_players)
