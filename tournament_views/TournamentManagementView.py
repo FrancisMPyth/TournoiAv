@@ -24,6 +24,7 @@ class TournamentManagementView:
         return tournament
 
     def manage_tournament(self, tournament):
+        saved = False  
         while True:
             clear_screen()
             print(f"Gestion du tournoi '{tournament.tournament_id}':")
@@ -48,6 +49,9 @@ class TournamentManagementView:
             elif sub_choice == "2":
                 self.display_report(tournament)
             elif sub_choice == "3":
+                if not saved:
+                    self.tournament_controller.save_tournaments_to_file() 
+                    saved = True
                 break
             else:
                 print("Choix invalide. Veuillez réessayer.")
@@ -299,7 +303,10 @@ class TournamentManagementView:
                 print("Choix invalide. Veuillez réessayer.")
                 input("Appuyez sur Entrée pour continuer...")
 
+        self.tournament_controller.save_tournaments_to_file()  
+
         return current_round
+
 
 
     def serialize_match_data(self, match_number, match_tuple, start_time):

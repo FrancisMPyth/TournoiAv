@@ -42,3 +42,6 @@ class Round:
             round_obj.matches.append(match)
 
         return round_obj
+
+    def serialize(self):
+        return self.to_dict()

@@ -1,6 +1,7 @@
 # main.py
 
 import os
+import atexit  # Ajoutez l'import pour atexit
 from controllers.player_controller import PlayerController
 from controllers.tournament_controller import TournamentController
 from tournament_views.PlayerListView import PlayerListView
@@ -19,6 +20,10 @@ def main():
     tournament_creation_view = TournamentCreationView(tournament_controller, player_controller)
     tournament_list_view = TournamentListView()
     tournament_management_view = TournamentManagementView(tournament_controller, player_controller)
+
+    tournament_controller.load_tournaments_from_file()
+
+    atexit.register(tournament_controller.save_tournaments_to_file)
 
     while True:
         clear_screen()
@@ -57,7 +62,6 @@ def main():
         else:
             print("Choix invalide. Veuillez réessayer.")
         input("Appuyez sur Entrée pour continuer...")
-
 
 if __name__ == "__main__":
     main()

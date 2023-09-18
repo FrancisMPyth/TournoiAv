@@ -1,6 +1,8 @@
-# models/tournament.py
+# tournament.py
 
 from datetime import datetime
+from models.round import Round
+
 
 class Tournament:
     def __init__(self, tournament_id, name, location, start_date, end_date, number_of_rounds, selected_players, current_round=0, players=None):
@@ -19,6 +21,7 @@ class Tournament:
         tournament_count = len(self.tournaments)
         name_with_number = f"{name}_{tournament_count + 1}"
         return name_with_number
+
 
     def start_new_round(self):
         if self.current_round < self.number_of_rounds:

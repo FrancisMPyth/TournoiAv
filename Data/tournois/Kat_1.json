@@ -14,5 +14,13 @@
         "J006",
         "J007",
         "J008"
+    ],
+    "current_round": 0,
+    "rounds": [
+        {
+            "round_number": 1,
+            "matches": [],
+            "completed": false
+        }
     ]
 }
