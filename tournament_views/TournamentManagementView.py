@@ -63,40 +63,49 @@ class TournamentManagementView:
         if not os.path.exists(round_dir):
             os.makedirs(round_dir)
 
-        current_round = len(tournament.rounds) + 1
-        tournament.current_round = current_round
+        round_files = os.listdir(round_dir)
+        if round_files:
+            round_numbers = [int(file.split("_")[2].split(".")[0]) for file in round_files]
+            last_played_round = max(round_numbers)
+            tournament.current_round = last_played_round + 1 
+        else:
+            tournament.current_round = 1
 
-        if current_round > tournament.number_of_rounds:
+        if tournament.current_round > tournament.number_of_rounds:
             print("Tous les rounds ont déjà été lancés pour ce tournoi.")
             input("Appuyez sur Entrée pour continuer...")
-            return current_round
+            return tournament.current_round
 
-        if current_round > 1 and not tournament.rounds[current_round - 2].results_recorded:
+        if tournament.current_round > 1 and len(tournament.rounds) >= (tournament.current_round - 1) and not tournament.rounds[tournament.current_round - 2].is_completed():
             print("Les résultats du round précédent doivent être enregistrés avant de lancer le prochain round.")
             input("Appuyez sur Entrée pour continuer...")
-            return current_round
+            return tournament.current_round
 
-        new_round = Round(current_round, start_time=datetime.now())
+        new_round = Round(tournament.current_round, start_time=datetime.now())
 
         tournament.rounds.append(new_round)
-        tournament.rounds[current_round - 1].results_recorded = False
+        tournament.rounds[tournament.current_round - 1].results_recorded = False
 
         selected_players = self.create_matches_for_round(tournament)
 
-        round_file = os.path.join(round_dir, f"matchs_round_{current_round}.json")
+        round_file = os.path.join(round_dir, f"matchs_round_{tournament.current_round}.json")
 
-        matches_data = [self.serialize_match_data(idx + 1, match, new_round.start_time) for idx, match in enumerate(selected_players)]
+        matches_data = [self.serialize_match_data(idx + 1, match, new_round.start_time) for idx, match in
+                        enumerate(selected_players)]
         matches_data[0]["tournament_id"] = tournament.tournament_id
 
         with open(round_file, "w") as file:
             json.dump(matches_data, file, indent=4)
 
-        print(f"Le fichier du premier round a été créé : matchs_round_{current_round}.json")
+        tournament.current_round = new_round.round_number
+
+        tournament.save_to_file()  
+
+        print(f"Le fichier du premier round a été créé : matchs_round_{tournament.current_round}.json")
         input("Appuyez sur Entrée pour continuer...")
         tournament.first_round_launched = True
-        self.current_round = current_round
 
-        return current_round
+        return tournament.current_round
 
 
     def create_matches_for_round(self, tournament):

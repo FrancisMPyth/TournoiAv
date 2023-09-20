@@ -2,15 +2,9 @@
 
 import os
 import json
-import re
 from datetime import datetime
-from models.tournament import Tournament, Round  
+from models.tournament import Tournament, Round
 from config import DATA_DIR, TOURNOIS_DIR
-
-def datetime_to_string(obj):
-    if isinstance(obj, datetime):
-        return obj.strftime("%d/%m/%Y")
-    raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
 
 class TournamentController:
     def __init__(self, player_controller):
@@ -29,7 +23,7 @@ class TournamentController:
         tournament_id = self.generate_tournament_id(name)
 
         tournament = Tournament(tournament_id, name, location, start_date, end_date, number_of_rounds, selected_players, current_round=0, players=selected_players)
-        
+
         self.tournaments.append(tournament)
         self.save_tournaments_to_file()
         return tournament
@@ -74,14 +68,9 @@ class TournamentController:
         players = [self.player_controller.get_player_by_id(player_id) for player_id in players_ids]
         return [player for player in players if player is not None]
 
-    def load_rounds_for_tournament(self, tournament_data):
-        rounds_data = tournament_data.get("rounds", [])
-        rounds = [Round(**round_data) for round_data in rounds_data]
-        return rounds
-
     def serialize_tournament(self, tournament):
         players_ids = [player.chess_id for player in tournament.players]
-        rounds_data = [round.serialize() for round in tournament.rounds]  
+        rounds_data = [round.serialize() for round in tournament.rounds]
         tournament_data = {
             "tournament_id": tournament.tournament_id,
             "name": tournament.name,
@@ -91,15 +80,14 @@ class TournamentController:
             "number_of_rounds": tournament.number_of_rounds,
             "players": players_ids,
             "current_round": tournament.current_round,
-            "rounds": rounds_data  
+            "rounds": rounds_data
         }
         return tournament_data
 
-    def get_unique_filepath(self, tournament): 
+    def get_unique_filepath(self, tournament):
         tournament_id = tournament.tournament_id
         tournament_filename = f"{tournament_id}.json"
         return os.path.join(DATA_DIR, TOURNOIS_DIR, tournament_filename)
-
 
     def save_tournaments_to_file(self):
         for tournament in self.tournaments:
@@ -111,11 +99,10 @@ class TournamentController:
                     existing_data["rounds"] = [round.to_dict() for round in tournament.rounds]
 
                 with open(filepath, "w") as file:
-                    json.dump(existing_data, file, indent=4, default=datetime_to_string)
+                    json.dump(existing_data, file, indent=4)
             else:
                 os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
                 tournament_data = self.serialize_tournament(tournament)
                 with open(filepath, "w") as file:
-                    json.dump(tournament_data, file, indent=4, default=datetime_to_string)
-
+                    json.dump(tournament_data, file, indent=4)

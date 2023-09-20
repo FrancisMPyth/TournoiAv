@@ -1,7 +1,7 @@
 # main.py
 
 import os
-import atexit  # Ajoutez l'import pour atexit
+import atexit
 from controllers.player_controller import PlayerController
 from controllers.tournament_controller import TournamentController
 from tournament_views.PlayerListView import PlayerListView
