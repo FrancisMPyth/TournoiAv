@@ -57,11 +57,16 @@ class TournamentController:
         start_date = datetime.strptime(tournament_data.get("start_date", "01/01/2023"), "%d/%m/%Y")
         end_date = datetime.strptime(tournament_data.get("end_date", "01/01/2023"), "%d/%m/%Y")
         number_of_rounds = tournament_data.get("number_of_rounds", 4)
-        current_round = tournament_data.get("current_round", 0)
         players = self.load_players_for_tournament(tournament_data)
 
+        # Obtenez la valeur de current_round à partir du fichier JSON du tournoi
+        current_round = tournament_data.get("current_round", 0)
+        print(f"Current Round in JSON: {current_round}")
+
         tournament = Tournament(tournament_id, name, location, start_date, end_date, number_of_rounds, players, current_round=current_round)
+
         return tournament
+
 
     def load_players_for_tournament(self, tournament_data):
         players_ids = tournament_data.get("players", [])

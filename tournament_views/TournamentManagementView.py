@@ -24,40 +24,55 @@ class TournamentManagementView:
         return tournament
 
     def manage_tournament(self, tournament):
-        saved = False  
-        while True:
-            clear_screen()
-            print(f"Gestion du tournoi '{tournament.tournament_id}':")
-            
-            current_round = len(tournament.rounds) + 1
-            
-            if os.path.exists(os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds", f"matchs_round_{current_round}.json")):
-                print("1. Saisie des résultats")
-            else:
-                print("1. Lancer le premier round")
+        saved = False
 
-            print("2. Afficher le rapport")
-            print("3. Retour au Menu principal")
+        tournament.load_from_file()
 
-            sub_choice = input("Entrez votre choix : ")
+        def manage_tournament(self, tournament):
+            saved = False
 
-            if sub_choice == "1":
+            tournament.load_from_file()
+
+            while True:
+                clear_screen()
+                print(f"Gestion du tournoi '{tournament.tournament_id}':")
+                
+                current_round = len(tournament.rounds) + 1
+                
                 if os.path.exists(os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds", f"matchs_round_{current_round}.json")):
-                    current_round = self.record_match_results(tournament, current_round) 
+                    print("1. Saisie des résultats")
                 else:
-                    current_round = self.launch_first_round(tournament)
-            elif sub_choice == "2":
-                self.display_report(tournament)
-            elif sub_choice == "3":
-                if not saved:
-                    self.tournament_controller.save_tournaments_to_file() 
-                    saved = True
-                break
-            else:
-                print("Choix invalide. Veuillez réessayer.")
-                input("Appuyez sur Entrée pour continuer...")
+                    print("1. Lancer le premier round")
+
+                print("2. Afficher le rapport")
+                print("3. Retour au Menu principal")
+
+                sub_choice = input("Entrez votre choix : ")
+
+                if sub_choice == "1":
+                    if os.path.exists(os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds", f"matchs_round_{current_round}.json")):
+                        current_round = self.record_match_results(tournament, current_round) 
+                    else:
+                        current_round = self.launch_first_round(tournament)
+                elif sub_choice == "2":
+                    self.display_report(tournament)
+                elif sub_choice == "3":
+                    if not saved:
+                        self.tournament_controller.save_tournaments_to_file() 
+                        saved = True
+                    break
+                else:
+                    print("Choix invalide. Veuillez réessayer.")
+                    input("Appuyez sur Entrée pour continuer...")
 
     def launch_first_round(self, tournament):
+        print(f"Current Round in launch_first_round: {tournament.current_round}")
+
+        if tournament.first_round_launched:
+            print("Le premier round a déjà été lancé pour ce tournoi.")
+            input("Appuyez sur Entrée pour continuer...")
+            return tournament.current_round
+
         round_dir = os.path.join(GESTION_TOURNOIS_DIR, tournament.tournament_id, "rounds")
 
         if not os.path.exists(round_dir):
@@ -67,7 +82,7 @@ class TournamentManagementView:
         if round_files:
             round_numbers = [int(file.split("_")[2].split(".")[0]) for file in round_files]
             last_played_round = max(round_numbers)
-            tournament.current_round = last_played_round + 1 
+            tournament.current_round = last_played_round + 1
         else:
             tournament.current_round = 1
 
@@ -76,7 +91,11 @@ class TournamentManagementView:
             input("Appuyez sur Entrée pour continuer...")
             return tournament.current_round
 
-        if tournament.current_round > 1 and len(tournament.rounds) >= (tournament.current_round - 1) and not tournament.rounds[tournament.current_round - 2].is_completed():
+        if (
+            tournament.current_round > 1
+            and len(tournament.rounds) >= (tournament.current_round - 1)
+            and not tournament.rounds[tournament.current_round - 2].is_completed()
+        ):
             print("Les résultats du round précédent doivent être enregistrés avant de lancer le prochain round.")
             input("Appuyez sur Entrée pour continuer...")
             return tournament.current_round
@@ -84,7 +103,9 @@ class TournamentManagementView:
         new_round = Round(tournament.current_round, start_time=datetime.now())
 
         tournament.rounds.append(new_round)
-        tournament.rounds[tournament.current_round - 1].results_recorded = False
+
+        if tournament.current_round > 1:
+            tournament.rounds[tournament.current_round - 2].results_recorded = False
 
         selected_players = self.create_matches_for_round(tournament)
 
@@ -99,15 +120,13 @@ class TournamentManagementView:
 
         tournament.current_round = new_round.round_number
 
-        tournament.save_to_file()  
+        tournament.first_round_launched = True
 
         print(f"Le fichier du premier round a été créé : matchs_round_{tournament.current_round}.json")
         input("Appuyez sur Entrée pour continuer...")
-        tournament.first_round_launched = True
 
         return tournament.current_round
-
-
+    
     def create_matches_for_round(self, tournament):
         num_players = len(tournament.selected_players)
         if num_players < 2:

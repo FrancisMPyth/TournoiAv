@@ -11,6 +11,10 @@ class TournamentListView:
             print(f"Début : {tournament.start_date.strftime('%d/%m/%Y')}")
             print(f"Fin : {tournament.end_date.strftime('%d/%m/%Y')}")
             print(f"Nombre de rounds : {tournament.number_of_rounds}")
+            if tournament.first_round_launched:
+                print("Le premier round a été lancé.")
+            else:
+                print("Le premier round n'a pas été lancé.")
             print("=" * 40)
 
     def display_players(self, tournament):
@@ -28,8 +32,12 @@ class TournamentListView:
         print(f"Début : {tournament.start_date.strftime('%d/%m/%Y')}")
         print(f"Fin : {tournament.end_date.strftime('%d/%m/%Y')}")
         print(f"Nombre de rounds : {tournament.number_of_rounds}")
+        if tournament.first_round_launched:
+            print("Le premier round a été lancé.")
+        else:
+            print("Le premier round n'a pas été lancé.")
 
     def save_tournament_to_file(self, tournament):
         filepath = f"Data/Tournois/{tournament.name}/info_{tournament.name}.json"
-       
+        # Vous pouvez ajouter ici la logique pour enregistrer les détails du tournoi dans un fichier JSON
         pass

@@ -1,12 +1,14 @@
 # tournament.py
 
 import json
-import os  
+import os
 from datetime import datetime
 from models.round import Round
 
+TOURNAMENT_DATA_DIR = "v:\\Projet 4\\Projet 4\\TournoiAv\\Data\\tournois"
+
 class Tournament:
-    def __init__(self, tournament_id, name, location, start_date, end_date, number_of_rounds, selected_players, current_round=None, players=None):
+    def __init__(self, tournament_id, name, location, start_date, end_date, number_of_rounds, selected_players, current_round=None, players=None, first_round_launched=False):  # Assurez-vous que first_round_launched est initialisé à False
         self.tournament_id = tournament_id
         self.name = name
         self.location = location
@@ -16,7 +18,7 @@ class Tournament:
         self.selected_players = selected_players
         self.players = players if players is not None else []
         self.rounds = []
-
+        self.first_round_launched = first_round_launched  
         self.load_current_round()
 
         if current_round is not None:
@@ -24,9 +26,10 @@ class Tournament:
         else:
             self.current_round = 0
 
+
     def load_current_round(self):
-        file_path = f"v:\\Projet 4\\Projet 4\\TournoiAv\\Data\\tournois\\{self.tournament_id}.json"
-        
+        file_path = os.path.join(TOURNAMENT_DATA_DIR, f"{self.tournament_id}.json")
+
         if not os.path.exists(file_path):
             return
 
@@ -34,21 +37,13 @@ class Tournament:
             try:
                 tournament_data = json.load(file)
                 self.current_round = tournament_data.get("current_round", 0)
-            except json.JSONDecodeError:
+
+                self.first_round_launched = tournament_data.get("first_round_launched", False)
+
+            except json.JSONDecodeError as e:
                 print(f"Erreur lors du chargement des données du fichier : {file_path}")
+                raise e
 
-    def start_new_round(self):
-        if self.current_round < self.number_of_rounds:
-            new_round_number = self.current_round + 1
-            new_round = Round(new_round_number)
-
-            self.rounds.append(new_round)
-            self.current_round = new_round_number
-        else:
-            print("Le tournoi est terminé.")
-
-    def get_current_round(self):
-        return self.rounds[self.current_round - 1] if self.current_round > 0 else None
 
     def save_to_file(self):
         data = {
@@ -60,17 +55,17 @@ class Tournament:
             "number_of_rounds": self.number_of_rounds,
             "players": [player.chess_id for player in self.selected_players],
             "current_round": self.current_round,
+            "first_round_launched": self.first_round_launched,  
             "rounds": [
                 {
                     "round_number": round_obj.round_number,
-                    "matches": [],
                     "completed": round_obj.completed
                 }
                 for round_obj in self.rounds
             ]
         }
 
-        file_path = f"v:\\Projet 4\\Projet 4\\TournoiAv\\Data\\tournois\\{self.tournament_id}.json"
+        file_path = os.path.join(TOURNAMENT_DATA_DIR, f"{self.tournament_id}.json")
 
         with open(file_path, "w") as file:
             json.dump(data, file, indent=4)
