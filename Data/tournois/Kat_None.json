@@ -1,0 +1,11 @@
+{
+    "tournament_id": null,
+    "name": "Kat",
+    "location": "Rouen",
+    "start_date": "28/10/2023",
+    "end_date": "28/10/2023",
+    "number_of_rounds": 4,
+    "current_round": 0,
+    "players": [],
+    "rounds": []
+}
