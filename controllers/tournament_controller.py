@@ -97,6 +97,7 @@ def afficher_liste_tournois():
 
         print("\n" + "-"*40 + "\n")
 
+    input("Appuyez sur Entrée pour continuer...")
 
 def load_all_tournaments():
     tournois = []
@@ -119,7 +120,8 @@ def gestion_tournois():
     choix = input("Entrez votre choix : ")
     
     if choix == "1":
-        from .tournament_controller import lancer_tournoi  
+        from controllers.tournament_controller import lancer_tournoi
+
         lancer_tournoi()
     elif choix == "2":
         pass
@@ -128,13 +130,7 @@ def gestion_tournois():
     
     input("Appuyez sur une touche pour continuer...")
 
+
 def setup_directories():
     if not os.path.exists(DATA_DIR):
-        os.makedirs(DATA_DIR)
-
-    if not os.path.exists(TOURNOIS_DIR):
-        os.makedirs(TOURNOIS_DIR)
-
-
-if __name__ == "__main__":
-    enregistrer_tournoi()
+        os
