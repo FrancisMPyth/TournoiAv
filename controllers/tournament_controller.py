@@ -35,9 +35,8 @@ def enregistrer_tournoi():
 
     print("Sélectionnez les joueurs par leur ID (séparés par des virgules) : ")
 
-    choix_ids = input().strip()  # Assure-toi de supprimer les espaces au début et à la fin
+    choix_ids = input().strip()  
     if choix_ids and all(char.isdigit() or char == ',' for char in choix_ids):
-        # Vérifier si la chaîne n'est pas vide et si elle contient uniquement des chiffres et des virgules
         ids = [int(id.strip()) for id in choix_ids.split(',')]
         joueurs_selectionnes = [joueur for joueur in joueurs if joueur['id'] in ids]
 
@@ -72,13 +71,13 @@ def afficher_liste_tournois():
         print(f"Date début: {tournoi['start_date']}")
         print(f"Date fin: {tournoi['end_date']}")
         print(f"Nombre de rondes: {tournoi['number_of_rounds']}")
-        
+
         print("\nJoueurs:")
         for joueur in tournoi['players']:
             print(f"  ID: {joueur['id']}, Prénom: {joueur['first_name']}, "
                   f"Nom: {joueur['last_name']}, Date de naissance: {joueur['date_of_birth']}, "
                   f"ID d'échecs: {joueur['chess_id']}, Score: {joueur['score']}")
-        
+
         print("\n" + "-"*40 + "\n")
 
 
@@ -94,11 +93,23 @@ def load_all_tournaments():
     return tournois
 
 
-def gestion_tournois(tournament):
+def gestion_tournois():
     clear_screen()
-    print("Gestion des tournois en cours...")
+    print("Gestion des tournois en cours...\n")
+    print("1. Lancer un Tournoi")
+    print("2. Autre option (à compléter)")
+    
+    choix = input("Entrez votre choix : ")
+    
+    if choix == "1":
+        from .tournament_controller import lancer_tournoi  
+        lancer_tournoi()
+    elif choix == "2":
+        pass
+    else:
+        print("Choix invalide. Veuillez réessayer.")
+    
     input("Appuyez sur une touche pour continuer...")
-
 
 def setup_directories():
     if not os.path.exists(DATA_DIR):
@@ -107,6 +118,6 @@ def setup_directories():
     if not os.path.exists(TOURNOIS_DIR):
         os.makedirs(TOURNOIS_DIR)
 
-        
-def clear_screen():
-    os.system('cls' if os.name == 'nt' else 'clear')
+
+if __name__ == "__main__":
+    enregistrer_tournoi()

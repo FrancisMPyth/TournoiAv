@@ -13,40 +13,36 @@ TOURNOIS_FILE = os.path.join(TOURNOIS_DIR, "tournois.json")
 
 
 def main_menu():
-    clear_screen()
-    print("Menu Principal :")
-    print("1. Enregistrement des joueurs")
-    print("2. Afficher la liste des joueurs")
-    print("3. Enregistrer un tournoi")
-    print("4. Afficher la liste des tournois")
-    print("5. Gestion des tournois")
-    print("q. Quitter")
+    while True:
+        clear_screen()
+        print("Menu Principal :")
+        print("1. Enregistrement des joueurs")
+        print("2. Afficher la liste des joueurs")
+        print("3. Enregistrer un tournoi")
+        print("4. Afficher la liste des tournois")
+        print("5. Gestion des tournois")
+        print("q. Quitter")
 
-    choix = input("Entrez votre choix : ")
+        choix = input("Entrez votre choix : ")
 
-    if choix == "1":
-        enregistrer_joueur()
-    elif choix == "2":
-        afficher_liste_joueurs()
+        if choix == "1":
+            enregistrer_joueur()
+        elif choix == "2":
+            afficher_liste_joueurs()
+        elif choix == "3":
+            enregistrer_tournoi()
+        elif choix == "4":
+            afficher_liste_tournois()
+        elif choix == "5":
+            gestion_tournois()
+        elif choix.lower() == "q":
+            exit()
+        else:
+            print("Choix invalide. Veuillez réessayer.")
 
-    elif choix == "3":
-        enregistrer_tournoi()
-    elif choix == "4":
-        afficher_liste_tournois()
-        input("Appuyez sur une touche pour retourner au Menu...")
+        if choix not in ["2", "4"]:
+            input("Appuyez sur une touche pour continuer...")
 
-    elif choix == "5":
-        gestion_tournois()
-
-    elif choix.lower() == "q":
-        exit()
-    else:
-        print("Choix invalide. Veuillez réessayer.")
-
-    main_menu()
-
-
-# Fonctions utilisées dans main_menu()
 def setup_directories():
     if not os.path.exists(DATA_DIR):
         os.makedirs(DATA_DIR)
