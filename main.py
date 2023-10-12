@@ -33,7 +33,7 @@ def main_menu():
         enregistrer_tournoi()
     elif choix == "4":
         afficher_liste_tournois()
-        input("Appuyez sur une touche pour continuer...")
+        input("Appuyez sur une touche pour retourner au Menu...")
 
     elif choix == "5":
         gestion_tournois()

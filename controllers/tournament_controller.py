@@ -33,56 +33,65 @@ def enregistrer_tournoi():
 
     joueurs_selectionnes = afficher_liste_joueurs(avec_message=False)
 
-    ids = []
-    while True:
-        choix_id = input("ID (appuyez sur Entrée après chaque ID, terminer avec une ligne vide) : ")
-        if choix_id.strip():
-            try:
-                joueur_id = int(choix_id.strip())
-                if joueur_id in ids:
-                    print("Ce joueur a déjà été sélectionné. Veuillez entrer un autre ID.")
-                else:
-                    ids.append(joueur_id)
-            except ValueError:
-                print("Veuillez entrer un ID valide (nombre entier).")
-        else:
-            if len(ids) % 2 == 0 and len(ids) > 0:
-                break
-            else:
-                print("Le nombre d'IDs doit être pair et supérieur à zéro. Ajoutez plus de joueurs.")
+    print("Sélectionnez les joueurs par leur ID (séparés par des virgules) : ")
 
-    joueurs_selectionnes = [joueur for joueur in joueurs if joueur['id'] in ids]
+    choix_ids = input().strip()  # Assure-toi de supprimer les espaces au début et à la fin
+    if choix_ids and all(char.isdigit() or char == ',' for char in choix_ids):
+        # Vérifier si la chaîne n'est pas vide et si elle contient uniquement des chiffres et des virgules
+        ids = [int(id.strip()) for id in choix_ids.split(',')]
+        joueurs_selectionnes = [joueur for joueur in joueurs if joueur['id'] in ids]
 
-    tournament = Tournament()
-    tournament.create(
-        name=name,
-        location=location,
-        start_date=start_date,
-        end_date=end_date,
-        number_of_rounds=number_of_rounds,
-        players=joueurs_selectionnes
-    )
+        tournament = Tournament()
+        tournament.create(
+            name=name,
+            location=location,
+            start_date=start_date,
+            end_date=end_date,
+            number_of_rounds=number_of_rounds,
+            players=joueurs_selectionnes
+        )
 
-    tournament.save()
+        tournament.save()
 
-    print("Tournoi enregistré.")
-    input("Appuyez sur une touche pour continuer...")
+        print("Tournoi enregistré.")
+        input("Appuyez sur une touche pour continuer...")
+    else:
+        print("Saisie incorrecte. Aucun joueur sélectionné. Le tournoi ne sera pas enregistré.")
+        input("Appuyez sur une touche pour continuer...")
 
 
 def afficher_liste_tournois():
     clear_screen()
     tournois = load_all_tournaments()
+    print("Affichage de la liste des tournois...\n")
 
-    if not tournois:
-        print("Aucun tournoi enregistré.")
-    else:
-        print("Affichage de la liste des tournois...")
-        for tournoi in tournois:
-            print(f"ID: {tournoi['tournament_id']}, Nom: {tournoi['name']}, Lieu: {tournoi['location']}, "
-                  f"Date début: {tournoi['start_date']}, Date fin: {tournoi['end_date']}, "
-                  f"Nombre de rondes: {tournoi['number_of_rounds']}, Joueurs: {tournoi['players']}")
+    for tournoi in tournois:
+        print(f"ID: {tournoi['tournament_id']}")
+        print(f"Nom: {tournoi['name']}")
+        print(f"Lieu: {tournoi['location']}")
+        print(f"Date début: {tournoi['start_date']}")
+        print(f"Date fin: {tournoi['end_date']}")
+        print(f"Nombre de rondes: {tournoi['number_of_rounds']}")
+        
+        print("\nJoueurs:")
+        for joueur in tournoi['players']:
+            print(f"  ID: {joueur['id']}, Prénom: {joueur['first_name']}, "
+                  f"Nom: {joueur['last_name']}, Date de naissance: {joueur['date_of_birth']}, "
+                  f"ID d'échecs: {joueur['chess_id']}, Score: {joueur['score']}")
+        
+        print("\n" + "-"*40 + "\n")
 
-    input("Appuyez sur une touche pour continuer...")
+
+def load_all_tournaments():
+    tournois = []
+    if os.path.exists(TOURNOIS_DIR):
+        for filename in os.listdir(TOURNOIS_DIR):
+            if filename.endswith(".json"):
+                file_path = os.path.join(TOURNOIS_DIR, filename)
+                with open(file_path, 'r') as file:
+                    tournoi_data = json.load(file)
+                    tournois.append(tournoi_data)
+    return tournois
 
 
 def gestion_tournois(tournament):
@@ -98,21 +107,6 @@ def setup_directories():
     if not os.path.exists(TOURNOIS_DIR):
         os.makedirs(TOURNOIS_DIR)
 
-
-def load_all_tournaments():
-    tournois = []
-
-    if os.path.exists(TOURNOIS_DIR):
-        tournament_files = [f for f in os.listdir(TOURNOIS_DIR) if f.endswith('.json')]
-
-        for file_name in tournament_files:
-            file_path = os.path.join(TOURNOIS_DIR, file_name)
-            with open(file_path, 'r') as file:
-                tournament_data = json.load(file)
-                tournois.append(tournament_data)
-
-    return tournois
-
-
+        
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
