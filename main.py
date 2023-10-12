@@ -28,7 +28,6 @@ def main_menu():
         enregistrer_joueur()
     elif choix == "2":
         afficher_liste_joueurs()
-        input("Appuyez sur une touche pour continuer...")
 
     elif choix == "3":
         enregistrer_tournoi()
