@@ -45,7 +45,6 @@ def main_menu():
 
         input("Appuyez sur une touche pour continuer...")
 
-# Fonctions utilisées dans main_menu()
 def setup_directories():
     if not os.path.exists(DATA_DIR):
         os.makedirs(DATA_DIR)
