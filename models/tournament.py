@@ -4,7 +4,7 @@ import json
 import os
 from models.round import Round
 
-TOURNAMENT_DATA_DIR = "v:\\Projet 4\\Projet 4\\TournoiAv\\Data\\tournois"
+TOURNAMENT_DATA_DIR = "v:\\Projet 4\\Projet 4\\data\\tournois"
 
 class Tournament:
     def __init__(self):
@@ -24,6 +24,7 @@ class Tournament:
         # récupération en BDD du dernier id de tournoi (last_tournament_id)
         # self.tournament_id = last_tournament_id + 1
         self.tournament_id = None 
+        self.name = name  # Ajoute cette ligne
         self.location = location
         self.start_date = start_date
         self.end_date = end_date
@@ -31,6 +32,7 @@ class Tournament:
         self.players = players
         self.current_round = current_round
         self.rounds = rounds
+
 
     def load_all(self):
         pass

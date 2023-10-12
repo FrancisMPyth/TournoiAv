@@ -67,9 +67,10 @@ def enregistrer_joueur():
     return None
 
 
-def afficher_liste_joueurs():
-    clear_screen()
-    print("Affichage de la liste des joueurs...")
+def afficher_liste_joueurs(avec_message=True):
+    if avec_message:
+        clear_screen()
+        print("Affichage de la liste des joueurs...")
 
     joueurs = []
     if os.path.exists(Config.JOUEURS_FILE):
@@ -81,8 +82,12 @@ def afficher_liste_joueurs():
               f"Nom: {joueur.get('last_name', 'N/A')}, Date de naissance: {joueur.get('birth_date', 'N/A')}, "
               f"ID d'échecs: {joueur.get('chess_id', 'N/A')}, Score: {joueur.get('score', 'N/A')}")
 
-    input("Appuyez sur une touche pour continuer...")
-    clear_screen() 
+    if avec_message:
+        input("Appuyez sur une touche pour continuer...")
+
+    if avec_message:
+        clear_screen()
+
     
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
