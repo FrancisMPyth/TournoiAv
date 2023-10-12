@@ -31,32 +31,49 @@ def enregistrer_tournoi():
         with open(Config.JOUEURS_FILE, 'r') as file:
             joueurs = json.load(file)
 
-    joueurs_selectionnes = afficher_liste_joueurs(avec_message=False)
+    joueurs_selectionnes = []
+    afficher_liste_joueurs(avec_message=False)
 
-    print("Sélectionnez les joueurs par leur ID (séparés par des virgules) : ")
+    while True:
+        print("Sélectionnez un joueur par son ID (appuyez sur Entrée pour terminer) : ")
+        choix_id = input().strip()
 
-    choix_ids = input().strip()  
-    if choix_ids and all(char.isdigit() or char == ',' for char in choix_ids):
-        ids = [int(id.strip()) for id in choix_ids.split(',')]
-        joueurs_selectionnes = [joueur for joueur in joueurs if joueur['id'] in ids]
+        if not choix_id:  # Si l'entrée est vide, terminer la sélection
+            if len(joueurs_selectionnes) % 2 != 0:
+                print("Le nombre de joueurs sélectionnés doit être pair.")
+                continuer = input("Voulez-vous ajouter un joueur supplémentaire ? (Oui/Non) : ")
+                if continuer.lower() == "oui":
+                    continue  # Reprendre la boucle pour ajouter un joueur
+                else:
+                    break  # Sortir de la boucle si l'utilisateur ne veut pas ajouter un joueur
+            else:
+                break  # Sortir de la boucle si le nombre de joueurs est pair
+        elif choix_id.isdigit():
+            id_joueur = int(choix_id)
+            joueur_selectionne = next((joueur for joueur in joueurs if joueur['id'] == id_joueur), None)
 
-        tournament = Tournament()
-        tournament.create(
-            name=name,
-            location=location,
-            start_date=start_date,
-            end_date=end_date,
-            number_of_rounds=number_of_rounds,
-            players=joueurs_selectionnes
-        )
+            if joueur_selectionne:
+                joueurs_selectionnes.append(joueur_selectionne)
+                joueurs.remove(joueur_selectionne)
+                print(f"Joueur sélectionné : {joueur_selectionne['first_name']} {joueur_selectionne['last_name']}")
+            else:
+                print("ID de joueur invalide. Veuillez réessayer.")
+        else:
+            print("ID de joueur invalide. Veuillez réessayer.")
 
-        tournament.save()
+    tournament = Tournament()
+    tournament.create(
+        name=name,
+        location=location,
+        start_date=start_date,
+        end_date=end_date,
+        number_of_rounds=number_of_rounds,
+        players=joueurs_selectionnes
+    )
 
-        print("Tournoi enregistré.")
-        input("Appuyez sur une touche pour continuer...")
-    else:
-        print("Saisie incorrecte. Aucun joueur sélectionné. Le tournoi ne sera pas enregistré.")
-        input("Appuyez sur une touche pour continuer...")
+    tournament.save()
+
+    print("Tournoi enregistré.")
 
 
 def afficher_liste_tournois():

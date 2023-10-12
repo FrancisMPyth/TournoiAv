@@ -3,11 +3,11 @@
 import json
 import os
 from models.player import Player
+from config.config import Config
 
 DATA_DIR = "data"
 JOUEURS_DIR = os.path.join(DATA_DIR, "joueurs")
 JOUEURS_FILE = os.path.join(JOUEURS_DIR, "joueurs.json")
-from config.config import Config 
 
 def setup_directories():
     if not os.path.exists(DATA_DIR):
@@ -63,23 +63,19 @@ def enregistrer_joueur():
 
     input("Appuyez sur une touche pour continuer...")
 
-
-    return None
-
-
 def afficher_liste_joueurs(avec_message=True):
     if avec_message:
         clear_screen()
         print("Affichage de la liste des joueurs...")
 
     joueurs = []
-    if os.path.exists(Config.JOUEURS_FILE):
-        with open(Config.JOUEURS_FILE, 'r') as file:
+    if os.path.exists(JOUEURS_FILE):
+        with open(JOUEURS_FILE, 'r') as file:
             joueurs = json.load(file)
 
     for joueur in joueurs:
         print(f"ID: {joueur.get('id', 'N/A')}, Prénom: {joueur.get('first_name', 'N/A')}, "
-              f"Nom: {joueur.get('last_name', 'N/A')}, Date de naissance: {joueur.get('birth_date', 'N/A')}, "
+              f"Nom: {joueur.get('last_name', 'N/A')}, Date de naissance: {joueur.get('date_of_birth', 'N/A')}, "
               f"ID d'échecs: {joueur.get('chess_id', 'N/A')}, Score: {joueur.get('score', 'N/A')}")
 
     if avec_message:
@@ -88,6 +84,5 @@ def afficher_liste_joueurs(avec_message=True):
     if avec_message:
         clear_screen()
 
-    
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
