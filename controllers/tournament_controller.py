@@ -6,6 +6,7 @@ from models.tournament import Tournament
 from controllers.player_controller import afficher_liste_joueurs
 from config.config import Config
 
+
 DATA_DIR = "data"
 TOURNOIS_DIR = os.path.join(DATA_DIR, "tournois")
 TOURNOIS_FILE = os.path.join(TOURNOIS_DIR, "tournois.json")
@@ -112,25 +113,35 @@ def load_all_tournaments():
 
 
 def gestion_tournois():
-    clear_screen()
-    print("Gestion des tournois en cours...\n")
-    print("1. Lancer un Tournoi")
-    print("2. Autre option (à compléter)")
-    
-    choix = input("Entrez votre choix : ")
-    
-    if choix == "1":
-        from controllers.tournament_controller import lancer_tournoi
+    while True:
+        clear_screen()
+        print("Gestion des tournois en cours...\n")
+        print("1. Lancer un Tournoi")
+        print("2. Autre option (à compléter)")
+        print("3. Quitter")
 
-        lancer_tournoi()
-    elif choix == "2":
-        pass
-    else:
-        print("Choix invalide. Veuillez réessayer.")
-    
-    input("Appuyez sur une touche pour continuer...")
+        choix = input("\nEntrez le numéro de votre choix : ")
 
+        if choix == "1":
+            # Ajoutez ici le code pour lancer un tournoi
+            print("Lancement du tournoi...")
+        elif choix == "2":
+            pass
+        elif choix == "3":
+            break
+        else:
+            print("Choix invalide. Veuillez réessayer.")
+
+        # Ajout pour afficher la liste des tournois après avoir fait un choix
+        print("\nListe des tournois enregistrés :")
+        afficher_liste_tournois()
+
+        input("Appuyez sur une touche pour continuer...")
 
 def setup_directories():
     if not os.path.exists(DATA_DIR):
-        os
+        os.makedirs(DATA_DIR)
+
+    if not os.path.exists(TOURNOIS_DIR):
+        os.makedirs(TOURNOIS_DIR)
+

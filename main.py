@@ -5,6 +5,7 @@ from controllers.tournament_controller import enregistrer_tournoi, afficher_list
 from controllers.player_controller import enregistrer_joueur, afficher_liste_joueurs
 from config.config import Config
 
+
 DATA_DIR = "data"
 JOUEURS_DIR = os.path.join(DATA_DIR, "joueurs")
 JOUEURS_FILE = os.path.join(JOUEURS_DIR, "joueurs.json")
