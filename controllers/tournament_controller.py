@@ -1,5 +1,6 @@
 # tournament_controller.py
 
+
 import os
 import json
 import random
@@ -8,6 +9,10 @@ from controllers.player_controller import afficher_liste_joueurs
 from config.config import Config
 from models.match import Match
 import datetime
+from itertools import combinations
+import itertools
+
+
 
 DATA_DIR = "data"
 TOURNOIS_DIR = os.path.join(DATA_DIR, "tournois")
@@ -168,7 +173,15 @@ def gestion_tournois():
         input("Appuyez sur une touche pour continuer...")
 
 def lancer_rounds(tournoi):
-    print(f"Lancement des rounds pour le tournoi : {tournoi['name']}")
+    print(f"Tournoi choisi : {tournoi['name']}")
+    
+    print("\nParticipants du tournoi :")
+    for joueur in tournoi['players']:
+        print(f"ID: {joueur['id']}, Prénom: {joueur['first_name']}, Nom: {joueur['last_name']}")
+
+    input("\nAppuyez sur Entrée pour continuer...")
+
+    print(f"\nLancement des rounds pour le tournoi : {tournoi['name']}")
 
     if tournoi.get('round_results') is None:
         random.shuffle(tournoi['players'])
@@ -176,32 +189,56 @@ def lancer_rounds(tournoi):
         tournoi['players'].sort(key=lambda x: x['score'], reverse=True)
 
     for round_number in range(tournoi['number_of_rounds']):
+        current_round_start_time = datetime.datetime.now()
+        print(f"\nDébut du Round {round_number + 1} - {current_round_start_time}\n")
+
         matches = generate_matches(tournoi['players'])
-        
-        print(f"\nDébut du Round {round_number + 1}\n")
+
 
         for match in matches:
             print(f"Match entre {match['player1']['first_name']} {match['player1']['last_name']} "
                   f"et {match['player2']['first_name']} {match['player2']['last_name']}")
 
-            score_player1 = float(input("Score pour le joueur 1 : "))
-            score_player2 = float(input("Score pour le joueur 2 : "))
-            
+        input("Appuyez sur Entrée pour commencer la saisie des résultats...")
+
+        round_results = []
+
+        for match in matches:
+            print(f"Score pour le joueur {match['player1']['first_name']} {match['player1']['last_name']} : ")
+            score_player1 = float(input())
+            print(f"Score pour le joueur {match['player2']['first_name']} {match['player2']['last_name']} : ")
+            score_player2 = float(input())
+
             match['match'].set_result(score_player1, score_player2)
             update_player_scores(match['player1'], match['player2'], score_player1, score_player2)
 
+            match_results = {
+                'player1': {
+                    'id': match['player1']['id'],
+                    'score': score_player1
+                },
+                'player2': {
+                    'id': match['player2']['id'],
+                    'score': score_player2
+                }
+            }
+            round_results.append(match_results)
+
             print(f"\nScores mis à jour :\n"
-                  f"  {match['player1']['first_name']} {match['player1']['last_name']}: {match['player1']['score']}\n"
-                  f"  {match['player2']['first_name']} {match['player2']['last_name']}: {match['player2']['score']}\n")
+                  f"  {match['player1']['first_name']} {match['player1']['last_name']} : {match['player1']['score']}\n"
+                  f"  {match['player2']['first_name']} {match['player2']['last_name']} : {match['player2']['score']}\n")
 
         if 'round_results' not in tournoi:
             tournoi['round_results'] = []
-        tournoi['round_results'].append(matches)
+        tournoi['round_results'].append({
+            'start_time': current_round_start_time,
+            'matches': round_results
+        })
 
         print(f"\nFin du Round {round_number + 1}\n")
 
     print("Rounds terminés.")
-    
+
 def afficher_suivi_rounds(tournoi):
     if 'round_results' not in tournoi or not tournoi['round_results']:
         print("Aucun round n'a encore été joué.")
@@ -227,10 +264,17 @@ def generate_matches(players):
     matches = []
     num_players = len(players)
 
-    for i in range(num_players - 1):
-        for j in range(i + 1, num_players):
-            match = Match(players[i]['id'], players[j]['id'])
-            matches.append({'match': match, 'player1': players[i], 'player2': players[j]})
+    if num_players % 2 != 0:
+        raise ValueError("Le nombre de joueurs doit être pair.")
+
+    random.shuffle(players)
+
+    while len(players) >= 2:
+        player1 = players.pop(0)
+        player2 = players.pop(0)
+
+        match = Match(player1['id'], player2['id'])
+        matches.append({'match': match, 'player1': player1, 'player2': player2})
 
     return matches
 
@@ -246,7 +290,6 @@ def choisir_tournoi():
     selected_tournoi = next((tournoi for tournoi in tournois if tournoi['tournament_id'] == tournoi_id), None)
 
     if selected_tournoi:
-        print(f"Tournoi choisi : {selected_tournoi['name']}")
         return selected_tournoi
     else:
         print("ID de tournoi invalide. Veuillez réessayer.")
