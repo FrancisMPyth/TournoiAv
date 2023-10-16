@@ -7,16 +7,28 @@ from models.tournament import Tournament
 from controllers.player_controller import afficher_liste_joueurs
 from config.config import Config
 from models.match import Match
+import datetime
 
 DATA_DIR = "data"
 TOURNOIS_DIR = os.path.join(DATA_DIR, "tournois")
-TOURNOIS_FILE = os.path.join(TOURNOIS_DIR, "tournois.json")
 TOURNAMENT_DATA_DIR = Config.TOURNOIS_DIR
-
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
+def get_valid_date(prompt):
+    while True:
+        date_input = input(prompt)
+        if validate_date_format(date_input):
+            return date_input
+        else:
+            print("Format de date invalide. Veuillez utiliser jj/mm/aaaa.")
+
+def afficher_joueurs_disponibles(joueurs):
+    print("Liste des joueurs disponibles :\n")
+    for joueur in joueurs:
+        print(f"ID: {joueur['id']}, Prénom: {joueur['first_name']}, Nom: {joueur['last_name']}")
+    print("\n")
 
 def enregistrer_tournoi():
     setup_directories()
@@ -24,8 +36,10 @@ def enregistrer_tournoi():
 
     name = input("Nom du tournoi : ")
     location = input("Lieu : ")
-    start_date = input("Date de début (jj/mm/aaaa) : ")
-    end_date = input("Date de fin (jj/mm/aaaa) : ")
+
+    start_date = get_valid_date("Date de début (jj/mm/aaaa) : ")
+    end_date = get_valid_date("Date de fin (jj/mm/aaaa) : ")
+
     number_of_rounds = int(input("Nombre de rondes : "))
 
     joueurs = []
@@ -37,19 +51,20 @@ def enregistrer_tournoi():
     afficher_liste_joueurs(avec_message=False)
 
     while True:
+        afficher_joueurs_disponibles(joueurs)
         print("Sélectionnez un joueur par son ID (appuyez sur Entrée pour terminer) : ")
         choix_id = input().strip()
 
-        if not choix_id:  
+        if not choix_id:
             if len(joueurs_selectionnes) % 2 != 0:
                 print("Le nombre de joueurs sélectionnés doit être pair.")
                 continuer = input("Voulez-vous ajouter un joueur supplémentaire ? (Oui/Non) : ")
                 if continuer.lower() == "oui":
-                    continue  
+                    continue
                 else:
-                    break  
+                    break
             else:
-                break  
+                break
         elif choix_id.isdigit():
             id_joueur = int(choix_id)
             joueur_selectionne = next((joueur for joueur in joueurs if joueur['id'] == id_joueur), None)
@@ -77,6 +92,17 @@ def enregistrer_tournoi():
 
     print("Tournoi enregistré.")
 
+def validate_date_format(date):
+    try:
+        datetime.datetime.strptime(date, '%d/%m/%Y')
+        return True
+    except ValueError:
+        return False
+
+def validate_end_date(start_date, end_date):
+    start_date_obj = datetime.datetime.strptime(start_date, '%d/%m/%Y')
+    end_date_obj = datetime.datetime.strptime(end_date, '%d/%m/%Y')
+    return end_date_obj >= start_date_obj
 
 def afficher_liste_tournois():
     clear_screen()
@@ -97,7 +123,7 @@ def afficher_liste_tournois():
                   f"Nom: {joueur['last_name']}, Date de naissance: {joueur['date_of_birth']}, "
                   f"ID d'échecs: {joueur['chess_id']}, Score: {joueur['score']}")
 
-        print("\n" + "-"*40 + "\n")
+        print("\n" + "-" * 40 + "\n")
 
     input("Appuyez sur Entrée pour continuer...")
 
@@ -111,7 +137,6 @@ def load_all_tournaments():
                     tournoi_data = json.load(file)
                     tournois.append(tournoi_data)
     return tournois
-
 
 def gestion_tournois():
     while True:
@@ -159,19 +184,16 @@ def lancer_rounds(tournoi):
             print(f"Match entre {match['player1']['first_name']} {match['player1']['last_name']} "
                   f"et {match['player2']['first_name']} {match['player2']['last_name']}")
 
-            # Saisir les résultats du match
             score_player1 = float(input("Score pour le joueur 1 : "))
             score_player2 = float(input("Score pour le joueur 2 : "))
             
             match['match'].set_result(score_player1, score_player2)
             update_player_scores(match['player1'], match['player2'], score_player1, score_player2)
 
-            # Afficher les scores mis à jour après chaque match
             print(f"\nScores mis à jour :\n"
                   f"  {match['player1']['first_name']} {match['player1']['last_name']}: {match['player1']['score']}\n"
                   f"  {match['player2']['first_name']} {match['player2']['last_name']}: {match['player2']['score']}\n")
 
-        # Enregistrez les résultats du round actuel
         if 'round_results' not in tournoi:
             tournoi['round_results'] = []
         tournoi['round_results'].append(matches)
@@ -192,6 +214,7 @@ def afficher_suivi_rounds(tournoi):
             print(f"Match entre {match['player1']['first_name']} {match['player1']['last_name']} "
                   f"et {match['player2']['first_name']} {match['player2']['last_name']}")
             print(f"Score : {match['match'].score_player1} - {match['match'].score_player2}\n")
+
 def saisir_resultats():
     tournoi = choisir_tournoi()
     if tournoi:
@@ -235,3 +258,6 @@ def setup_directories():
 
     if not os.path.exists(TOURNOIS_DIR):
         os.makedirs(TOURNOIS_DIR)
+
+if __name__ == "__main__":
+    gestion_tournois()
