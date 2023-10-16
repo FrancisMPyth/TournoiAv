@@ -4,6 +4,7 @@ import json
 import os
 from models.player import Player
 from config.config import Config
+import datetime
 
 DATA_DIR = "data"
 JOUEURS_DIR = os.path.join(DATA_DIR, "joueurs")
@@ -37,7 +38,7 @@ def enregistrer_joueur():
             else:
                 print("Erreur: L'identifiant d'échecs doit être composé de 2 lettres suivies de 5 chiffres.")
 
-        joueur_id = len(joueurs) + 1  # Identifiant unique basé sur le nombre actuel de joueurs
+        joueur_id = len(joueurs) + 1  
 
         player = Player()
         player.create(first_name, last_name, date_of_birth, chess_id, joueur_id)
@@ -61,7 +62,10 @@ def enregistrer_joueur():
         if continuer.lower() != "oui":
             break
 
-    input("Appuyez sur une touche pour continuer...")
+def retour_menu():
+    input("Appuyez sur une touche pour retourner au menu...")
+    clear_screen()
+
 
 def afficher_liste_joueurs(avec_message=True):
     if avec_message:
@@ -81,8 +85,8 @@ def afficher_liste_joueurs(avec_message=True):
     if avec_message:
         input("Appuyez sur une touche pour continuer...")
 
-    if avec_message:
-        clear_screen()
+    clear_screen()
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
+

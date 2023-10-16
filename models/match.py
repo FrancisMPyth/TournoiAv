@@ -1,6 +1,4 @@
-
-# Match
-
+# Match.py
 from datetime import datetime
 
 class Match:
@@ -21,3 +19,14 @@ class Match:
 
     def save(self):
         pass
+
+    def get_winner_points(self):
+        if self.score_player1 > self.score_player2:
+            return 1
+        elif self.score_player1 < self.score_player2:
+            return 0
+        else:
+            return 0.5
+
+    def get_loser_points(self):
+        return 1 - self.get_winner_points()

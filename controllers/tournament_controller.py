@@ -2,10 +2,11 @@
 
 import os
 import json
+import random
 from models.tournament import Tournament
 from controllers.player_controller import afficher_liste_joueurs
 from config.config import Config
-
+from models.match import Match
 
 DATA_DIR = "data"
 TOURNOIS_DIR = os.path.join(DATA_DIR, "tournois")
@@ -39,16 +40,16 @@ def enregistrer_tournoi():
         print("Sélectionnez un joueur par son ID (appuyez sur Entrée pour terminer) : ")
         choix_id = input().strip()
 
-        if not choix_id:  # Si l'entrée est vide, terminer la sélection
+        if not choix_id:  
             if len(joueurs_selectionnes) % 2 != 0:
                 print("Le nombre de joueurs sélectionnés doit être pair.")
                 continuer = input("Voulez-vous ajouter un joueur supplémentaire ? (Oui/Non) : ")
                 if continuer.lower() == "oui":
-                    continue  # Reprendre la boucle pour ajouter un joueur
+                    continue  
                 else:
-                    break  # Sortir de la boucle si l'utilisateur ne veut pas ajouter un joueur
+                    break  
             else:
-                break  # Sortir de la boucle si le nombre de joueurs est pair
+                break  
         elif choix_id.isdigit():
             id_joueur = int(choix_id)
             joueur_selectionne = next((joueur for joueur in joueurs if joueur['id'] == id_joueur), None)
@@ -117,26 +118,116 @@ def gestion_tournois():
         clear_screen()
         print("Gestion des tournois en cours...\n")
         print("1. Lancer un Tournoi")
-        print("2. Autre option (à compléter)")
-        print("3. Quitter")
+        print("2. Saisir les résultats des matchs")
+        print("3. Autre option (à compléter)")
+        print("4. Quitter")
 
         choix = input("\nEntrez le numéro de votre choix : ")
 
         if choix == "1":
-            # Ajoutez ici le code pour lancer un tournoi
-            print("Lancement du tournoi...")
+            tournoi = choisir_tournoi()
+            if tournoi:
+                lancer_rounds(tournoi)
         elif choix == "2":
-            pass
+            saisir_resultats()
         elif choix == "3":
+            pass
+        elif choix == "4":
             break
         else:
             print("Choix invalide. Veuillez réessayer.")
 
-        # Ajout pour afficher la liste des tournois après avoir fait un choix
         print("\nListe des tournois enregistrés :")
         afficher_liste_tournois()
 
         input("Appuyez sur une touche pour continuer...")
+
+def lancer_rounds(tournoi):
+    print(f"Lancement des rounds pour le tournoi : {tournoi['name']}")
+
+    if tournoi.get('round_results') is None:
+        random.shuffle(tournoi['players'])
+    else:
+        tournoi['players'].sort(key=lambda x: x['score'], reverse=True)
+
+    for round_number in range(tournoi['number_of_rounds']):
+        matches = generate_matches(tournoi['players'])
+        
+        print(f"\nDébut du Round {round_number + 1}\n")
+
+        for match in matches:
+            print(f"Match entre {match['player1']['first_name']} {match['player1']['last_name']} "
+                  f"et {match['player2']['first_name']} {match['player2']['last_name']}")
+
+            # Saisir les résultats du match
+            score_player1 = float(input("Score pour le joueur 1 : "))
+            score_player2 = float(input("Score pour le joueur 2 : "))
+            
+            match['match'].set_result(score_player1, score_player2)
+            update_player_scores(match['player1'], match['player2'], score_player1, score_player2)
+
+            # Afficher les scores mis à jour après chaque match
+            print(f"\nScores mis à jour :\n"
+                  f"  {match['player1']['first_name']} {match['player1']['last_name']}: {match['player1']['score']}\n"
+                  f"  {match['player2']['first_name']} {match['player2']['last_name']}: {match['player2']['score']}\n")
+
+        # Enregistrez les résultats du round actuel
+        if 'round_results' not in tournoi:
+            tournoi['round_results'] = []
+        tournoi['round_results'].append(matches)
+
+        print(f"\nFin du Round {round_number + 1}\n")
+
+    print("Rounds terminés.")
+    
+def afficher_suivi_rounds(tournoi):
+    if 'round_results' not in tournoi or not tournoi['round_results']:
+        print("Aucun round n'a encore été joué.")
+        return
+
+    for round_number, matches in enumerate(tournoi['round_results']):
+        print(f"\nRound {round_number + 1} - Début : {matches[0]['match'].start_time}, Fin : {matches[-1]['match'].end_time}\n")
+
+        for match in matches:
+            print(f"Match entre {match['player1']['first_name']} {match['player1']['last_name']} "
+                  f"et {match['player2']['first_name']} {match['player2']['last_name']}")
+            print(f"Score : {match['match'].score_player1} - {match['match'].score_player2}\n")
+def saisir_resultats():
+    tournoi = choisir_tournoi()
+    if tournoi:
+        lancer_rounds(tournoi)
+
+def update_player_scores(player1, player2, score_player1, score_player2):
+    pass
+
+def generate_matches(players):
+    matches = []
+    num_players = len(players)
+
+    for i in range(num_players - 1):
+        for j in range(i + 1, num_players):
+            match = Match(players[i]['id'], players[j]['id'])
+            matches.append({'match': match, 'player1': players[i], 'player2': players[j]})
+
+    return matches
+
+def choisir_tournoi():
+    clear_screen()
+    print("Choisir un tournoi par son ID :")
+
+    tournois = load_all_tournaments()
+    for tournoi in tournois:
+        print(f"ID: {tournoi['tournament_id']}, Nom: {tournoi['name']}")
+
+    tournoi_id = input("Saisissez l'ID du tournoi choisi : ")
+    selected_tournoi = next((tournoi for tournoi in tournois if tournoi['tournament_id'] == tournoi_id), None)
+
+    if selected_tournoi:
+        print(f"Tournoi choisi : {selected_tournoi['name']}")
+        return selected_tournoi
+    else:
+        print("ID de tournoi invalide. Veuillez réessayer.")
+        return None
 
 def setup_directories():
     if not os.path.exists(DATA_DIR):
@@ -144,4 +235,3 @@ def setup_directories():
 
     if not os.path.exists(TOURNOIS_DIR):
         os.makedirs(TOURNOIS_DIR)
-
