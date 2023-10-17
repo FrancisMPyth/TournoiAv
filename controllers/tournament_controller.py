@@ -9,17 +9,17 @@ from controllers.player_controller import afficher_liste_joueurs
 from config.config import Config
 from models.match import Match
 import datetime
-from itertools import combinations
-import itertools
 
-
+tournament_data = {}
 
 DATA_DIR = "data"
 TOURNOIS_DIR = os.path.join(DATA_DIR, "tournois")
 TOURNAMENT_DATA_DIR = Config.TOURNOIS_DIR
 
+
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
+
 
 def get_valid_date(prompt):
     while True:
@@ -29,11 +29,13 @@ def get_valid_date(prompt):
         else:
             print("Format de date invalide. Veuillez utiliser jj/mm/aaaa.")
 
+
 def afficher_joueurs_disponibles(joueurs):
     print("Liste des joueurs disponibles :\n")
     for joueur in joueurs:
         print(f"ID: {joueur['id']}, Prénom: {joueur['first_name']}, Nom: {joueur['last_name']}")
     print("\n")
+
 
 def enregistrer_tournoi():
     setup_directories()
@@ -97,6 +99,7 @@ def enregistrer_tournoi():
 
     print("Tournoi enregistré.")
 
+
 def validate_date_format(date):
     try:
         datetime.datetime.strptime(date, '%d/%m/%Y')
@@ -104,10 +107,12 @@ def validate_date_format(date):
     except ValueError:
         return False
 
+
 def validate_end_date(start_date, end_date):
     start_date_obj = datetime.datetime.strptime(start_date, '%d/%m/%Y')
     end_date_obj = datetime.datetime.strptime(end_date, '%d/%m/%Y')
     return end_date_obj >= start_date_obj
+
 
 def afficher_liste_tournois():
     clear_screen()
@@ -167,14 +172,30 @@ def gestion_tournois():
         else:
             print("Choix invalide. Veuillez réessayer.")
 
-        print("\nListe des tournois enregistrés :")
-        afficher_liste_tournois()
+def generate_and_display_pairs(tournament_id, round_number, players):
+    random.shuffle(players)
+    pairs = [{'player1': players[i], 'player2': players[i + 1]} for i in range(0, len(players) - 1, 2)]
 
-        input("Appuyez sur une touche pour continuer...")
+    print(f"Paires pour le Round {round_number}:")
+    for i, pair in enumerate(pairs, start=1):
+        print(f"Match {i}: {pair['player1']['first_name']} {pair['player1']['last_name']} vs "
+              f"{pair['player2']['first_name']} {pair['player2']['last_name']}")
+
+    if tournament_id not in tournament_data:
+        tournament_data[tournament_id] = {'rounds': []}
+
+    tournament_data[tournament_id]['rounds'].append({'round': round_number, 'pairs': pairs})
+    with open('tournament_data.json', 'w') as file:
+        json.dump(tournament_data, file, indent=4)
+
+    input("\nAppuyez sur Entrée pour continuer...")
+
+    return pairs
+
 
 def lancer_rounds(tournoi):
     print(f"Tournoi choisi : {tournoi['name']}")
-    
+
     print("\nParticipants du tournoi :")
     for joueur in tournoi['players']:
         print(f"ID: {joueur['id']}, Prénom: {joueur['first_name']}, Nom: {joueur['last_name']}")
@@ -184,7 +205,7 @@ def lancer_rounds(tournoi):
     print(f"\nLancement des rounds pour le tournoi : {tournoi['name']}")
 
     if tournoi.get('round_results') is None:
-        random.shuffle(tournoi['players'])
+        round_pairs = generate_and_display_pairs(tournoi['tournament_id'], 1, tournoi['players'])
     else:
         tournoi['players'].sort(key=lambda x: x['score'], reverse=True)
 
@@ -192,52 +213,13 @@ def lancer_rounds(tournoi):
         current_round_start_time = datetime.datetime.now()
         print(f"\nDébut du Round {round_number + 1} - {current_round_start_time}\n")
 
-        matches = generate_matches(tournoi['players'])
-
-
+        matches = round_pairs  
         for match in matches:
             print(f"Match entre {match['player1']['first_name']} {match['player1']['last_name']} "
                   f"et {match['player2']['first_name']} {match['player2']['last_name']}")
 
-        input("Appuyez sur Entrée pour commencer la saisie des résultats...")
-
-        round_results = []
-
-        for match in matches:
-            print(f"Score pour le joueur {match['player1']['first_name']} {match['player1']['last_name']} : ")
-            score_player1 = float(input())
-            print(f"Score pour le joueur {match['player2']['first_name']} {match['player2']['last_name']} : ")
-            score_player2 = float(input())
-
-            match['match'].set_result(score_player1, score_player2)
-            update_player_scores(match['player1'], match['player2'], score_player1, score_player2)
-
-            match_results = {
-                'player1': {
-                    'id': match['player1']['id'],
-                    'score': score_player1
-                },
-                'player2': {
-                    'id': match['player2']['id'],
-                    'score': score_player2
-                }
-            }
-            round_results.append(match_results)
-
-            print(f"\nScores mis à jour :\n"
-                  f"  {match['player1']['first_name']} {match['player1']['last_name']} : {match['player1']['score']}\n"
-                  f"  {match['player2']['first_name']} {match['player2']['last_name']} : {match['player2']['score']}\n")
-
-        if 'round_results' not in tournoi:
-            tournoi['round_results'] = []
-        tournoi['round_results'].append({
-            'start_time': current_round_start_time,
-            'matches': round_results
-        })
-
-        print(f"\nFin du Round {round_number + 1}\n")
-
-    print("Rounds terminés.")
+        print("\nRetour au sous-menu.")
+        return
 
 def afficher_suivi_rounds(tournoi):
     if 'round_results' not in tournoi or not tournoi['round_results']:
@@ -277,6 +259,7 @@ def generate_matches(players):
         matches.append({'match': match, 'player1': player1, 'player2': player2})
 
     return matches
+
 
 def choisir_tournoi():
     clear_screen()
