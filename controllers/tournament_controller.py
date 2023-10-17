@@ -1,6 +1,5 @@
 # tournament_controller.py
 
-
 import os
 import json
 import random
@@ -95,7 +94,12 @@ def enregistrer_tournoi():
         players=joueurs_selectionnes
     )
 
-    tournament.save()
+    tournament_id = tournament.tournament_id  
+
+    file_path = os.path.join(TOURNOIS_DIR, f"{tournament_id}_tournament_data.json")
+
+    with open(file_path, 'w') as file:
+        json.dump(tournament.data(), file, indent=4)
 
     print("Tournoi enregistré.")
 
@@ -185,7 +189,7 @@ def generate_and_display_pairs(tournament_id, round_number, players):
         tournament_data[tournament_id] = {'rounds': []}
 
     tournament_data[tournament_id]['rounds'].append({'round': round_number, 'pairs': pairs})
-    with open('tournament_data.json', 'w') as file:
+    with open(os.path.join(TOURNOIS_DIR, f"{tournament_id}_tournament_data.json"), 'w') as file:
         json.dump(tournament_data, file, indent=4)
 
     input("\nAppuyez sur Entrée pour continuer...")
