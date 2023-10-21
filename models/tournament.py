@@ -1,3 +1,6 @@
+# Tournament
+
+
 import json
 import os
 from models.round import Round
@@ -70,6 +73,6 @@ class Tournament:
             "end_date": self.end_date,
             "number_of_rounds": self.number_of_rounds,
             "current_round": self.current_round,
-            "players": self.players,
-            "rounds": self.rounds
+            "players": [player.to_dict() for player in self.players],  # Convertir les joueurs en dictionnaires
+            "rounds": [round.to_dict() for round in self.rounds]  # Convertir les rounds en dictionnaires
         }
