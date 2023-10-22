@@ -16,11 +16,5 @@ class Round:
         match = self.matches[match_index]
         match.set_result(score_player1, score_player2)
 
-    def to_dict(self):
-        return {
-            "round_number": self.round_number,
-            "matches": [match.to_dict() for match in self.matches],
-            "start_time": self.start_time,
-            "end_time": self.end_time
-        }
-
+    
+    

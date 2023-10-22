@@ -1,6 +1,5 @@
 # Tournament
 
-
 import json
 import os
 from models.round import Round
@@ -47,15 +46,13 @@ class Tournament:
         self.tournament_id = id
 
     def save(self):
-        data = self.to_dict()
-
         if not os.path.exists(TOURNAMENT_DATA_DIR):
             os.makedirs(TOURNAMENT_DATA_DIR)
 
         file_path = os.path.join(TOURNAMENT_DATA_DIR, f"{self.tournament_id}.json")
 
         with open(file_path, "w") as file:
-            json.dump(data, file, indent=4)
+            json.dump(self.__dict__, file, indent=4)
 
     def next_round(self):
         if self.current_round < self.number_of_rounds:
@@ -63,16 +60,3 @@ class Tournament:
             new_round = Round()
             self.rounds.append(new_round.generate_new_round_from_tournament(self))
             self.save()
-
-    def to_dict(self):
-        return {
-            "tournament_id": self.tournament_id,
-            "name": self.name,
-            "location": self.location,
-            "start_date": self.start_date,
-            "end_date": self.end_date,
-            "number_of_rounds": self.number_of_rounds,
-            "current_round": self.current_round,
-            "players": [player.to_dict() for player in self.players],  # Convertir les joueurs en dictionnaires
-            "rounds": [round.to_dict() for round in self.rounds]  # Convertir les rounds en dictionnaires
-        }

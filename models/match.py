@@ -15,11 +15,4 @@ class Match:
         self.score_player2 = score_player2
         self.date_time = datetime.now()
 
-    def to_dict(self):
-        return {
-            "player1": self.player1.to_dict(),
-            "player2": self.player2.to_dict(),
-            "score_player1": self.score_player1,
-            "score_player2": self.score_player2,
-            "date_time": self.date_time
-        }
+    

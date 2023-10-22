@@ -11,14 +11,4 @@ class Player:
         self.national_chess_id = national_chess_id
         self.score = 0
 
-    def to_dict(self):
-        return {
-            "first_name": self.first_name,
-            "last_name": self.last_name,
-            "date_of_birth": self.date_of_birth,
-            "chess_id": self.chess_id,
-            "national_chess_id": self.national_chess_id,
-            "score": self.score
-        }
-
     

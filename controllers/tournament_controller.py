@@ -43,7 +43,14 @@ def enregistrer_tournoi():
     location = input("Lieu : ")
 
     start_date = get_valid_date("Date de début (jj/mm/aaaa) : ")
-    end_date = get_valid_date("Date de fin (jj/mm/aaaa) : ")
+    
+    while True:
+        end_date = get_valid_date("Date de fin (jj/mm/aaaa) : ")
+        if validate_end_date(start_date, end_date):
+            break
+        else:
+            print("La date de fin ne peut pas être antérieure à la date de début. Veuillez choisir une nouvelle date de fin.")
+    
 
     number_of_rounds = int(input("Nombre de rondes : "))
 
@@ -57,19 +64,36 @@ def enregistrer_tournoi():
 
     while True:
         afficher_joueurs_disponibles(joueurs)
-        print("Sélectionnez un joueur par son ID (appuyez sur Entrée pour terminer) : ")
+        print("Sélectionnez un joueur par son ID (appuyez sur Entrée pour terminer, 'A' pour ajouter) : ")
         choix_id = input().strip()
 
         if not choix_id:
             if len(joueurs_selectionnes) % 2 != 0:
                 print("Le nombre de joueurs sélectionnés doit être pair.")
-                continuer = input("Voulez-vous ajouter un joueur supplémentaire ? (Oui/Non) : ")
-                if continuer.lower() == "oui":
+                action = input("Voulez-vous ajouter un joueur supplémentaire (A) ou annuler (autre touche) ? : ")
+                if action.lower() == "a":
                     continue
                 else:
                     break
             else:
                 break
+        elif choix_id.lower() == "a":
+            # Ajouter un joueur supplémentaire
+            afficher_liste_joueurs(avec_message=False)
+            nouveau_choix = input("Sélectionnez un joueur par son ID à ajouter : ").strip()
+
+            if nouveau_choix.isdigit():
+                id_joueur = int(nouveau_choix)
+                joueur_selectionne = next((joueur for joueur in joueurs if joueur['id'] == id_joueur), None)
+
+                if joueur_selectionne:
+                    joueurs_selectionnes.append(joueur_selectionne)
+                    joueurs.remove(joueur_selectionne)
+                    print(f"Joueur ajouté : {joueur_selectionne['first_name']} {joueur_selectionne['last_name']}")
+                else:
+                    print("ID de joueur invalide. Veuillez réessayer.")
+            else:
+                print("ID de joueur invalide. Veuillez réessayer.")
         elif choix_id.isdigit():
             id_joueur = int(choix_id)
             joueur_selectionne = next((joueur for joueur in joueurs if joueur['id'] == id_joueur), None)
@@ -82,6 +106,10 @@ def enregistrer_tournoi():
                 print("ID de joueur invalide. Veuillez réessayer.")
         else:
             print("ID de joueur invalide. Veuillez réessayer.")
+
+    if len(joueurs_selectionnes) % 2 != 0:
+        print("Le nombre de joueurs sélectionnés doit être pair. Annulation de l'enregistrement du tournoi.")
+        return
 
     tournament = Tournament()
     tournament.create(
@@ -96,6 +124,7 @@ def enregistrer_tournoi():
     tournament.save()
 
     print("Tournoi enregistré.")
+
 
 def validate_date_format(date):
     try:
@@ -149,8 +178,7 @@ def gestion_tournois():
         print("Gestion des tournois en cours...\n")
         print("1. Lancer un Tournoi")
         print("2. Saisir les résultats des matchs")
-        print("3. Afficher la liste des tournois")
-        print("4. Quitter")
+        print("3. Quitter")
 
         choix = input("\nEntrez le numéro de votre choix : ")
 
@@ -161,12 +189,10 @@ def gestion_tournois():
         elif choix == "2":
             saisir_resultats()
         elif choix == "3":
-            afficher_liste_tournois()
-            input("Appuyez sur une touche pour continuer...")
-        elif choix == "4":
             break
         else:
             print("Choix invalide. Veuillez réessayer.")
+
 
 
 def lancer_rounds(tournoi):
@@ -185,6 +211,7 @@ def lancer_rounds(tournoi):
     else:
         tournoi['players'].sort(key=lambda x: x['score'], reverse=True)
 
+    tournoi['rounds'] = []  # Nouvelle clé pour stocker les détails des rounds
     retour_sous_menu = False
 
     for round_number in range(tournoi['number_of_rounds']):
@@ -193,27 +220,53 @@ def lancer_rounds(tournoi):
 
         matches = generate_matches(tournoi['players'])
 
+
+        round_details = {'round_number': round_number + 1, 'matches': []}  # Détails du round
+
         for match in matches:
             print(f"Match entre {match['player1']['first_name']} {match['player1']['last_name']} "
                   f"et {match['player2']['first_name']} {match['player2']['last_name']}")
 
-        retour_menu = input("Appuyez sur Entrée pour revenir au sous-menu...")
+            match_details = {
+                'player1': {'id': match['player1']['id'], 'score': 0},
+                'player2': {'id': match['player2']['id'], 'score': 0}
+            }
+            round_details['matches'].append(match_details)
 
-        if retour_menu.lower() == '':
+        tournoi['rounds'].append(round_details)  # Ajout des détails du round à la liste
+
+        retour_menu = input("Appuyez sur 'M' pour revenir au menu, ou appuyez sur Entrée pour revenir au sous-menu...")
+
+        if retour_menu.lower() == 'm':
             retour_sous_menu = True
             break
 
+        elif retour_menu.lower() == '':
+            print("Retour au sous-menu...\n")
+            retour_sous_menu = True
+            break  # Ajout de cette ligne pour sortir de la boucle après chaque round
+
     if retour_sous_menu:
         print("Retour au sous-menu...\n")
-       
+        input("Appuyez sur Entrée pour revenir au sous-menu...")
+
+        # Enregistrement des données du tournoi dans le fichier existant
+        save_tournament_data(tournoi)
 
     print("Rounds terminés.")
 
+def save_tournament_data(tournoi):
+    if 'tournament_id' not in tournoi:
+        print("Erreur: Impossible de sauvegarder les données du tournoi, l'identifiant du tournoi est manquant.")
+        return
 
-
-
-
-
+    file_path = os.path.join(TOURNOIS_DIR, f"{tournoi['tournament_id']}.json")
+    try:
+        with open(file_path, 'w') as file:
+            json.dump(tournoi, file, indent=4)
+        print(f"Les données du tournoi ont été sauvegardées avec succès dans : {file_path}")
+    except Exception as e:
+        print(f"Erreur lors de la sauvegarde des données du tournoi : {str(e)}")
 
 
 
