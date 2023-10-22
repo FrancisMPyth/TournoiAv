@@ -43,14 +43,7 @@ def enregistrer_tournoi():
     location = input("Lieu : ")
 
     start_date = get_valid_date("Date de début (jj/mm/aaaa) : ")
-    
-    while True:
-        end_date = get_valid_date("Date de fin (jj/mm/aaaa) : ")
-        if validate_end_date(start_date, end_date):
-            break
-        else:
-            print("La date de fin ne peut pas être antérieure à la date de début. Veuillez choisir une nouvelle date de fin.")
-    
+    end_date = get_valid_date("Date de fin (jj/mm/aaaa) : ")
 
     number_of_rounds = int(input("Nombre de rondes : "))
 
@@ -64,36 +57,19 @@ def enregistrer_tournoi():
 
     while True:
         afficher_joueurs_disponibles(joueurs)
-        print("Sélectionnez un joueur par son ID (appuyez sur Entrée pour terminer, 'A' pour ajouter) : ")
+        print("Sélectionnez un joueur par son ID (appuyez sur Entrée pour terminer) : ")
         choix_id = input().strip()
 
         if not choix_id:
             if len(joueurs_selectionnes) % 2 != 0:
                 print("Le nombre de joueurs sélectionnés doit être pair.")
-                action = input("Voulez-vous ajouter un joueur supplémentaire (A) ou annuler (autre touche) ? : ")
-                if action.lower() == "a":
+                continuer = input("Voulez-vous ajouter un joueur supplémentaire ? (Oui/Non) : ")
+                if continuer.lower() == "oui":
                     continue
                 else:
                     break
             else:
                 break
-        elif choix_id.lower() == "a":
-            # Ajouter un joueur supplémentaire
-            afficher_liste_joueurs(avec_message=False)
-            nouveau_choix = input("Sélectionnez un joueur par son ID à ajouter : ").strip()
-
-            if nouveau_choix.isdigit():
-                id_joueur = int(nouveau_choix)
-                joueur_selectionne = next((joueur for joueur in joueurs if joueur['id'] == id_joueur), None)
-
-                if joueur_selectionne:
-                    joueurs_selectionnes.append(joueur_selectionne)
-                    joueurs.remove(joueur_selectionne)
-                    print(f"Joueur ajouté : {joueur_selectionne['first_name']} {joueur_selectionne['last_name']}")
-                else:
-                    print("ID de joueur invalide. Veuillez réessayer.")
-            else:
-                print("ID de joueur invalide. Veuillez réessayer.")
         elif choix_id.isdigit():
             id_joueur = int(choix_id)
             joueur_selectionne = next((joueur for joueur in joueurs if joueur['id'] == id_joueur), None)
@@ -107,9 +83,9 @@ def enregistrer_tournoi():
         else:
             print("ID de joueur invalide. Veuillez réessayer.")
 
-    if len(joueurs_selectionnes) % 2 != 0:
-        print("Le nombre de joueurs sélectionnés doit être pair. Annulation de l'enregistrement du tournoi.")
-        return
+    # Ajout des noms des joueurs dans la liste des joueurs du tournoi
+    for joueur in joueurs_selectionnes:
+        joueur['name'] = f"{joueur['first_name']} {joueur['last_name']}"
 
     tournament = Tournament()
     tournament.create(
@@ -124,6 +100,7 @@ def enregistrer_tournoi():
     tournament.save()
 
     print("Tournoi enregistré.")
+
 
 
 def validate_date_format(date):
@@ -220,7 +197,6 @@ def lancer_rounds(tournoi):
 
         matches = generate_matches(tournoi['players'])
 
-
         round_details = {'round_number': round_number + 1, 'matches': []}  # Détails du round
 
         for match in matches:
@@ -228,8 +204,8 @@ def lancer_rounds(tournoi):
                   f"et {match['player2']['first_name']} {match['player2']['last_name']}")
 
             match_details = {
-                'player1': {'id': match['player1']['id'], 'score': 0},
-                'player2': {'id': match['player2']['id'], 'score': 0}
+                'player1': {'id': match['player1']['id'], 'score': 0, 'name': f"{match['player1']['first_name']} {match['player1']['last_name']}"},
+                'player2': {'id': match['player2']['id'], 'score': 0, 'name': f"{match['player2']['first_name']} {match['player2']['last_name']}"}
             }
             round_details['matches'].append(match_details)
 
@@ -244,7 +220,7 @@ def lancer_rounds(tournoi):
         elif retour_menu.lower() == '':
             print("Retour au sous-menu...\n")
             retour_sous_menu = True
-            break  # Ajout de cette ligne pour sortir de la boucle après chaque round
+            break
 
     if retour_sous_menu:
         print("Retour au sous-menu...\n")
@@ -255,19 +231,23 @@ def lancer_rounds(tournoi):
 
     print("Rounds terminés.")
 
+
+
 def save_tournament_data(tournoi):
     if 'tournament_id' not in tournoi:
         print("Erreur: Impossible de sauvegarder les données du tournoi, l'identifiant du tournoi est manquant.")
         return
 
-    file_path = os.path.join(TOURNOIS_DIR, f"{tournoi['tournament_id']}.json")
-    try:
-        with open(file_path, 'w') as file:
-            json.dump(tournoi, file, indent=4)
-        print(f"Les données du tournoi ont été sauvegardées avec succès dans : {file_path}")
-    except Exception as e:
-        print(f"Erreur lors de la sauvegarde des données du tournoi : {str(e)}")
+    # Ajoute les noms des joueurs aux données du tournoi avant de sauvegarder
+    for player in tournoi['players']:
+        player_id = player['id']
+        matching_player = next((p for p in tournoi['players'] if p['id'] == player_id), None)
+        if matching_player:
+            player['name'] = f"{matching_player['first_name']} {matching_player['last_name']}"
 
+    file_path = os.path.join(TOURNOIS_DIR, f"{tournoi['tournament_id']}.json")
+    with open(file_path, 'w') as file:
+        json.dump(tournoi, file, indent=4)
 
 
 def afficher_suivi_rounds(tournoi):
@@ -308,6 +288,7 @@ def generate_matches(players):
         matches.append({'match': match, 'player1': player1, 'player2': player2})
 
     return matches
+
 
 def choisir_tournoi():
     clear_screen()
