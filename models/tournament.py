@@ -3,8 +3,7 @@
 import json
 import os
 from models.round import Round
-
-TOURNAMENT_DATA_DIR = "v:\\Projet 4\\Projet 4\\data\\tournois"
+from config.config import Config
 
 class Tournament:
     counter = 1  # Initialiser le compteur à 1
@@ -46,10 +45,10 @@ class Tournament:
         self.tournament_id = id
 
     def save(self):
-        if not os.path.exists(TOURNAMENT_DATA_DIR):
-            os.makedirs(TOURNAMENT_DATA_DIR)
+        if not os.path.exists(Config.TOURNOIS_DIR):
+            os.makedirs(Config.TOURNOIS_DIR)
 
-        file_path = os.path.join(TOURNAMENT_DATA_DIR, f"{self.tournament_id}.json")
+        file_path = os.path.join(Config.TOURNOIS_DIR, f"{self.tournament_id}.json")
 
         with open(file_path, "w") as file:
             json.dump(self.__dict__, file, indent=4)
