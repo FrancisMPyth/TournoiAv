@@ -183,9 +183,9 @@ def gestion_tournois():
     while True:
         clear_screen()
         print("Gestion des tournois en cours...\n")
-        print("1. Lancer un Tournoi")
+        print("1. Gérer le Tournoi")
         print("2. Saisir les résultats des matchs")
-        print("3. Quitter")
+        print("3. Menu")
 
         choix = input("\nEntrez le numéro de votre choix : ")
 
