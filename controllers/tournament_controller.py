@@ -87,9 +87,30 @@ def enregistrer_tournoi():
     for joueur in joueurs_selectionnes:
         joueur['name'] = f"{joueur['first_name']} {joueur['last_name']}"
 
+    # Récupération des tournois existants pour générer un suffixe unique
+    existing_tournaments = []
+    if os.path.exists(Config.TOURNOIS_DIR):
+        for filename in os.listdir(Config.TOURNOIS_DIR):
+            if filename.endswith(".json"):
+                with open(os.path.join(Config.TOURNOIS_DIR, filename), 'r') as file:
+                    existing_tournament = json.load(file)
+                    existing_tournaments.append(existing_tournament)
+
+    def generer_suffixe_unique(name, existing_tournaments):
+        i = 1
+        new_name = name
+        while any(t['name'] == new_name for t in existing_tournaments):
+            new_name = f"{name}_{i}"
+            i += 1
+        return new_name
+
+
+    # Génération du nom du tournoi avec un suffixe unique
+    unique_name = generer_suffixe_unique(name, existing_tournaments)
+
     tournament = Tournament()
     tournament.create(
-        name=name,
+        name=unique_name,
         location=location,
         start_date=start_date,
         end_date=end_date,
@@ -99,8 +120,7 @@ def enregistrer_tournoi():
 
     tournament.save()
 
-    print("Tournoi enregistré.")
-
+    print(f"Tournoi '{unique_name}' enregistré.")
 
 
 def validate_date_format(date):
@@ -116,27 +136,43 @@ def validate_end_date(start_date, end_date):
     return end_date_obj >= start_date_obj
 
 def afficher_liste_tournois():
+    setup_directories()
     clear_screen()
-    tournois = load_all_tournaments()
-    print("Affichage de la liste des tournois...\n")
 
-    for tournoi in tournois:
-        print(f"ID: {tournoi['tournament_id']}")
-        print(f"Nom: {tournoi['name']}")
-        print(f"Lieu: {tournoi['location']}")
-        print(f"Date début: {tournoi['start_date']}")
-        print(f"Date fin: {tournoi['end_date']}")
-        print(f"Nombre de rondes: {tournoi['number_of_rounds']}")
+    tournois = []
+    if os.path.exists(Config.TOURNOIS_DIR):
+        for filename in os.listdir(Config.TOURNOIS_DIR):
+            if filename.endswith(".json"):
+                with open(os.path.join(Config.TOURNOIS_DIR, filename), 'r') as file:
+                    tournoi = json.load(file)
+                    tournois.append(tournoi)
 
-        print("\nJoueurs:")
-        for joueur in tournoi['players']:
-            print(f"  ID: {joueur['id']}, Prénom: {joueur['first_name']}, "
-                  f"Nom: {joueur['last_name']}, Date de naissance: {joueur['date_of_birth']}, "
-                  f"ID d'échecs: {joueur['chess_id']}, Score: {joueur['score']}")
+    if not tournois:
+        print("Aucun tournoi enregistré.")
+    else:
+        print("Liste des tournois :\n")
+        for tournoi in tournois:
+            print(f"ID: {tournoi['tournament_id']}")
+            print(f"Nom: {tournoi['name']}")
+            print(f"Lieu: {tournoi['location']}")
+            print(f"Date début: {tournoi['start_date']}")
+            print(f"Date fin: {tournoi['end_date']}")
+            print(f"Nombre de rondes: {tournoi['number_of_rounds']}")
 
-        print("\n" + "-" * 40 + "\n")
+            if 'current_round' in tournoi and tournoi['current_round'] > 0:
+                print(f"Round en cours: {tournoi['current_round']}")
+            else:
+                print("Le tournoi n'a pas encore commencé.")
+
+            print("\nJoueurs:")
+            for joueur in tournoi['players']:
+                print(f"  ID: {joueur['id']}, Prénom: {joueur['first_name']}, Nom: {joueur['last_name']}, Date de naissance: {joueur['date_of_birth']}, ID d'échecs: {joueur['chess_id']}, Score: {joueur['score']}, Nom complet: {joueur['name']}")
+
+            print("\n" + "-" * 40 + "\n")
 
     input("Appuyez sur Entrée pour continuer...")
+
+
 
 def load_all_tournaments():
     tournois = []
@@ -188,7 +224,8 @@ def lancer_rounds(tournoi):
     else:
         tournoi['players'].sort(key=lambda x: x['score'], reverse=True)
 
-    tournoi['rounds'] = []  # Nouvelle clé pour stocker les détails des rounds
+    tournoi['current_round'] += 1  # Mise à jour du nombre de rounds actuel
+    tournoi['rounds'] = []  # Initialisation de la liste des rounds pour le tour actuel
     retour_sous_menu = False
 
     for round_number in range(tournoi['number_of_rounds']):
@@ -230,6 +267,7 @@ def lancer_rounds(tournoi):
         save_tournament_data(tournoi)
 
     print("Rounds terminés.")
+
 
 
 
