@@ -166,7 +166,7 @@ def afficher_liste_tournois():
 
             print("\n" + "-" * 40 + "\n")
 
-    input("Appuyez sur Entrée pour continuer...")
+    input("Appuyez sur Entrée pour retourner au menu...")
 
 def load_all_tournaments():
     tournois = []

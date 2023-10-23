@@ -19,7 +19,7 @@ def main_menu():
         print("1. Enregistrement des joueurs")
         print("2. Afficher la liste des joueurs")
         print("3. Enregistrer un tournoi")
-        print("4. Afficher la liste des tournois")
+        print("4. Historique des tournois")
         print("5. Gestion des tournois")
         print("q. Quitter")
 

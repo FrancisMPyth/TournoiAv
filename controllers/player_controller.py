@@ -40,8 +40,7 @@ def enregistrer_joueur():
 
         joueur_id = len(joueurs) + 1  
 
-        player = Player()
-        player.create(first_name, last_name, date_of_birth, chess_id, joueur_id)
+        player = Player(first_name, last_name, date_of_birth, chess_id, joueur_id)
 
         joueur_data = {
             "id": joueur_id,
@@ -66,7 +65,6 @@ def retour_menu():
     input("Appuyez sur une touche pour retourner au menu...")
     clear_screen()
 
-
 def afficher_liste_joueurs(avec_message=True):
     if avec_message:
         clear_screen()
@@ -83,10 +81,9 @@ def afficher_liste_joueurs(avec_message=True):
               f"ID d'échecs: {joueur.get('chess_id', 'N/A')}, Score: {joueur.get('score', 'N/A')}")
 
     if avec_message:
-        input("Appuyez sur une touche pour continuer...")
+        input("Appuyez sur une touche pour retourner au menu...")
 
     clear_screen()
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
-
