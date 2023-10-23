@@ -1,6 +1,5 @@
 # tournament_controller.py
 
-
 import os
 import json
 import random
@@ -11,8 +10,6 @@ from models.match import Match
 import datetime
 from itertools import combinations
 import itertools
-
-
 
 DATA_DIR = "data"
 TOURNOIS_DIR = os.path.join(DATA_DIR, "tournois")
@@ -29,6 +26,14 @@ def get_valid_date(prompt):
         else:
             print("Format de date invalide. Veuillez utiliser jj/mm/aaaa.")
 
+def generer_suffixe_unique(name, existing_tournaments):
+    i = 1
+    new_name = name
+    while any(t['name'] == new_name for t in existing_tournaments):
+        new_name = f"{name}_{i}"
+        i += 1
+    return new_name
+
 def afficher_joueurs_disponibles(joueurs):
     print("Liste des joueurs disponibles :\n")
     for joueur in joueurs:
@@ -43,7 +48,13 @@ def enregistrer_tournoi():
     location = input("Lieu : ")
 
     start_date = get_valid_date("Date de début (jj/mm/aaaa) : ")
-    end_date = get_valid_date("Date de fin (jj/mm/aaaa) : ")
+
+    while True:
+        end_date = get_valid_date("Date de fin (jj/mm/aaaa) : ")
+        if validate_end_date(start_date, end_date):
+            break
+        else:
+            print("La date de fin doit être égale ou postérieure à la date de début. Veuillez réessayer.")
 
     number_of_rounds = int(input("Nombre de rondes : "))
 
@@ -83,27 +94,11 @@ def enregistrer_tournoi():
         else:
             print("ID de joueur invalide. Veuillez réessayer.")
 
-    # Ajout des noms des joueurs dans la liste des joueurs du tournoi
     for joueur in joueurs_selectionnes:
         joueur['name'] = f"{joueur['first_name']} {joueur['last_name']}"
 
     # Récupération des tournois existants pour générer un suffixe unique
-    existing_tournaments = []
-    if os.path.exists(Config.TOURNOIS_DIR):
-        for filename in os.listdir(Config.TOURNOIS_DIR):
-            if filename.endswith(".json"):
-                with open(os.path.join(Config.TOURNOIS_DIR, filename), 'r') as file:
-                    existing_tournament = json.load(file)
-                    existing_tournaments.append(existing_tournament)
-
-    def generer_suffixe_unique(name, existing_tournaments):
-        i = 1
-        new_name = name
-        while any(t['name'] == new_name for t in existing_tournaments):
-            new_name = f"{name}_{i}"
-            i += 1
-        return new_name
-
+    existing_tournaments = load_all_tournaments()
 
     # Génération du nom du tournoi avec un suffixe unique
     unique_name = generer_suffixe_unique(name, existing_tournaments)
@@ -121,7 +116,6 @@ def enregistrer_tournoi():
     tournament.save()
 
     print(f"Tournoi '{unique_name}' enregistré.")
-
 
 def validate_date_format(date):
     try:
@@ -166,13 +160,13 @@ def afficher_liste_tournois():
 
             print("\nJoueurs:")
             for joueur in tournoi['players']:
-                print(f"  ID: {joueur['id']}, Prénom: {joueur['first_name']}, Nom: {joueur['last_name']}, Date de naissance: {joueur['date_of_birth']}, ID d'échecs: {joueur['chess_id']}, Score: {joueur['score']}, Nom complet: {joueur['name']}")
+                print(f"  ID: {joueur['id']}, Prénom: {joueur['first_name']}, Nom: {joueur['last_name']}, "
+                      f"Date de naissance: {joueur['date_of_birth']}, ID d'échecs: {joueur['chess_id']}, "
+                      f"Score: {joueur['score']}, Nom complet: {joueur['name']}")
 
             print("\n" + "-" * 40 + "\n")
 
     input("Appuyez sur Entrée pour continuer...")
-
-
 
 def load_all_tournaments():
     tournois = []
@@ -206,11 +200,14 @@ def gestion_tournois():
         else:
             print("Choix invalide. Veuillez réessayer.")
 
-
-
 def lancer_rounds(tournoi):
+    if tournoi.get('current_round', 0) > 0:
+        print(f"Le tournoi '{tournoi['name']}' a déjà commencé. Retour au menu principal.")
+        input("Appuyez sur Entrée pour continuer...")
+        return
+
     print(f"Tournoi choisi : {tournoi['name']}")
-    
+
     print("\nParticipants du tournoi :")
     for joueur in tournoi['players']:
         print(f"ID: {joueur['id']}, Prénom: {joueur['first_name']}, Nom: {joueur['last_name']}")
@@ -241,8 +238,10 @@ def lancer_rounds(tournoi):
                   f"et {match['player2']['first_name']} {match['player2']['last_name']}")
 
             match_details = {
-                'player1': {'id': match['player1']['id'], 'score': 0, 'name': f"{match['player1']['first_name']} {match['player1']['last_name']}"},
-                'player2': {'id': match['player2']['id'], 'score': 0, 'name': f"{match['player2']['first_name']} {match['player2']['last_name']}"}
+                'player1': {'id': match['player1']['id'], 'score': 0,
+                            'name': f"{match['player1']['first_name']} {match['player1']['last_name']}"},
+                'player2': {'id': match['player2']['id'], 'score': 0,
+                            'name': f"{match['player2']['first_name']} {match['player2']['last_name']}"}
             }
             round_details['matches'].append(match_details)
 
@@ -263,20 +262,15 @@ def lancer_rounds(tournoi):
         print("Retour au sous-menu...\n")
         input("Appuyez sur Entrée pour revenir au sous-menu...")
 
-        # Enregistrement des données du tournoi dans le fichier existant
         save_tournament_data(tournoi)
 
     print("Rounds terminés.")
-
-
-
 
 def save_tournament_data(tournoi):
     if 'tournament_id' not in tournoi:
         print("Erreur: Impossible de sauvegarder les données du tournoi, l'identifiant du tournoi est manquant.")
         return
 
-    # Ajoute les noms des joueurs aux données du tournoi avant de sauvegarder
     for player in tournoi['players']:
         player_id = player['id']
         matching_player = next((p for p in tournoi['players'] if p['id'] == player_id), None)
@@ -286,7 +280,6 @@ def save_tournament_data(tournoi):
     file_path = os.path.join(TOURNOIS_DIR, f"{tournoi['tournament_id']}.json")
     with open(file_path, 'w') as file:
         json.dump(tournoi, file, indent=4)
-
 
 def afficher_suivi_rounds(tournoi):
     if 'round_results' not in tournoi or not tournoi['round_results']:
@@ -327,17 +320,24 @@ def generate_matches(players):
 
     return matches
 
-
 def choisir_tournoi():
     clear_screen()
     print("Choisir un tournoi par son ID :")
 
     tournois = load_all_tournaments()
-    for tournoi in tournois:
+
+    tournois_disponibles = [tournoi for tournoi in tournois if tournoi.get('current_round', 0) == 0]
+
+    if not tournois_disponibles:
+        print("Aucun tournoi disponible pour le lancement.")
+        input("Appuyez sur Entrée pour continuer...")
+        return None
+
+    for tournoi in tournois_disponibles:
         print(f"ID: {tournoi['tournament_id']}, Nom: {tournoi['name']}")
 
     tournoi_id = input("Saisissez l'ID du tournoi choisi : ")
-    selected_tournoi = next((tournoi for tournoi in tournois if tournoi['tournament_id'] == tournoi_id), None)
+    selected_tournoi = next((tournoi for tournoi in tournois_disponibles if tournoi['tournament_id'] == tournoi_id), None)
 
     if selected_tournoi:
         return selected_tournoi
