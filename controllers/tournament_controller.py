@@ -72,9 +72,9 @@ def enregistrer_tournoi():
         choix_id = input().strip()
 
         if not choix_id:
-            if len(joueurs_selectionnes) % 2 != 0:
-                print("Le nombre de joueurs sélectionnés doit être pair.")
-                continuer = input("Voulez-vous ajouter un joueur supplémentaire ? (Oui/Non) : ")
+            if len(joueurs_selectionnes) % 2 != 0 or len(joueurs_selectionnes) < 8:
+                print("Le nombre de joueurs sélectionnés doit être pair et au moins égal à 8.")
+                continuer = input("Voulez-vous ajouter des joueurs supplémentaires ? (Oui/Non) : ")
                 if continuer.lower() == "oui":
                     continue
                 else:
@@ -94,28 +94,22 @@ def enregistrer_tournoi():
         else:
             print("ID de joueur invalide. Veuillez réessayer.")
 
-    for joueur in joueurs_selectionnes:
-        joueur['name'] = f"{joueur['first_name']} {joueur['last_name']}"
+    if len(joueurs_selectionnes) % 2 != 0 or len(joueurs_selectionnes) < 2:
+        print("Le nombre de joueurs sélectionnés doit être pair et supérieur ou égal à 2. Annulation de l'enregistrement du tournoi.")
+    else:
+        tournament = Tournament()
+        tournament.create(
+            name=name,
+            location=location,
+            start_date=start_date,
+            end_date=end_date,
+            number_of_rounds=number_of_rounds,
+            players=joueurs_selectionnes
+        )
 
-    # Récupération des tournois existants pour générer un suffixe unique
-    existing_tournaments = load_all_tournaments()
+        tournament.save()
 
-    # Génération du nom du tournoi avec un suffixe unique
-    unique_name = generer_suffixe_unique(name, existing_tournaments)
-
-    tournament = Tournament()
-    tournament.create(
-        name=unique_name,
-        location=location,
-        start_date=start_date,
-        end_date=end_date,
-        number_of_rounds=number_of_rounds,
-        players=joueurs_selectionnes
-    )
-
-    tournament.save()
-
-    print(f"Tournoi '{unique_name}' enregistré.")
+        print("Tournoi enregistré.")
 
 def validate_date_format(date):
     try:
@@ -146,25 +140,22 @@ def afficher_liste_tournois():
     else:
         print("Liste des tournois :\n")
         for tournoi in tournois:
-            print(f"ID: {tournoi['tournament_id']}")
+            print(f"\nID: {tournoi['tournament_id']}")
             print(f"Nom: {tournoi['name']}")
             print(f"Lieu: {tournoi['location']}")
             print(f"Date début: {tournoi['start_date']}")
             print(f"Date fin: {tournoi['end_date']}")
             print(f"Nombre de rondes: {tournoi['number_of_rounds']}")
-
-            if 'current_round' in tournoi and tournoi['current_round'] > 0:
-                print(f"Round en cours: {tournoi['current_round']}")
-            else:
+            
+            if tournoi['current_round'] == 0:
                 print("Le tournoi n'a pas encore commencé.")
+            else:
+                print(f"Tour en cours: {tournoi['current_round']}/{tournoi['number_of_rounds']}")
 
             print("\nJoueurs:")
             for joueur in tournoi['players']:
-                print(f"  ID: {joueur['id']}, Prénom: {joueur['first_name']}, Nom: {joueur['last_name']}, "
-                      f"Date de naissance: {joueur['date_of_birth']}, ID d'échecs: {joueur['chess_id']}, "
-                      f"Score: {joueur['score']}, Nom complet: {joueur['name']}")
-
-            print("\n" + "-" * 40 + "\n")
+                print(f"ID: {joueur['id']}, Nom: {joueur['first_name']} {joueur['last_name']}, "
+                    f"Score: {joueur.get('score', 'N/A')}")
 
     input("Appuyez sur Entrée pour retourner au menu...")
 
