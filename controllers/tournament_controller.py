@@ -91,6 +91,23 @@ def enregistrer_joueur():
         else:
             print("ID de joueur invalide. Veuillez réessayer.")
 
+def update_player_scores(players, matches):
+    for match in matches:
+        player1_id = match['player1']['id']
+        player2_id = match['player2']['id']
+
+        player1_score = match.get('score_player1', 0)
+        player2_score = match.get('score_player2', 0)
+
+        matching_player1 = next((p for p in players if p['id'] == player1_id), None)
+        matching_player2 = next((p for p in players if p['id'] == player2_id), None)
+
+        if matching_player1 is not None:
+            matching_player1['score'] = matching_player1.get('score', 0) + player1_score
+        if matching_player2 is not None:
+            matching_player2['score'] = matching_player2.get('score', 0) + player2_score
+
+    return players
 
 
 def enregistrer_tournoi():
@@ -214,10 +231,21 @@ def afficher_liste_tournois():
             else:
                 print(f"Tour en cours: {tournoi['current_round']}/{tournoi['number_of_rounds']}")
 
-            print("\nJoueurs:")
-            for joueur in tournoi['players']:
-                print(f"ID: {joueur['id']}, Nom: {joueur['first_name']} {joueur['last_name']}, "
-                    f"Score: {joueur.get('score', 'N/A')}")
+                # Afficher la liste des joueurs
+                print("\nJoueurs:")
+                for joueur in tournoi['players']:
+                    print(f"ID: {joueur['id']}, Nom: {joueur['first_name']} {joueur['last_name']}, "
+                          f"Score: {joueur.get('score', 'N/A')}")
+
+                # Afficher les matchs en cours
+                if 'rounds' in tournoi and tournoi['rounds']:
+                    current_round_number = tournoi['current_round']
+                    current_round_matches = tournoi['rounds'][current_round_number - 1]['matches']
+
+                    print("\nMatchs en cours :")
+                    for match in current_round_matches:
+                        print(f"Match entre {match['player1']['name']} et {match['player2']['name']}")
+                        print(f"Score : {match['player1']['score']} - {match['player2']['score']}\n")
 
     input("Appuyez sur Entrée pour retourner au menu...")
 
@@ -274,8 +302,8 @@ def lancer_rounds(tournoi):
     else:
         tournoi['players'].sort(key=lambda x: x['score'], reverse=True)
 
-    tournoi['current_round'] += 1 
-    tournoi['rounds'] = []  
+    tournoi['current_round'] += 1
+    tournoi['rounds'] = []
     retour_sous_menu = False
 
     for round_number in range(tournoi['number_of_rounds']):
@@ -305,7 +333,6 @@ def lancer_rounds(tournoi):
         if retour_menu.lower() == 'm':
             retour_sous_menu = True
             break
-
         elif retour_menu.lower() == '':
             print("Retour au sous-menu...\n")
             retour_sous_menu = True
@@ -315,9 +342,11 @@ def lancer_rounds(tournoi):
         print("Retour au sous-menu...\n")
         input("Appuyez sur Entrée pour revenir au sous-menu...")
 
+        # On sauvegarde les données ici
         save_tournament_data(tournoi)
 
     print("Rounds terminés.")
+
 
 def save_tournament_data(tournoi):
     if 'tournament_id' not in tournoi:
