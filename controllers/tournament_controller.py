@@ -3,11 +3,11 @@
 import os
 import json
 import random
+import datetime 
 from models.tournament import Tournament
 from controllers.player_controller import afficher_liste_joueurs
 from config.config import Config
 from models.match import Match
-import datetime 
 from itertools import combinations
 import itertools
 
@@ -43,6 +43,48 @@ def afficher_joueurs_disponibles(joueurs_disponibles):
         print(f"ID: {joueur['id']}, Prénom: {joueur['first_name']}, Nom: {joueur['last_name']}")
     print("\n")
 
+def display_available_players(joueurs_disponibles):
+    print("Liste des joueurs disponibles :\n")
+    for joueur in joueurs_disponibles:
+        print(f"ID: {joueur['id']}, Prénom: {joueur['first_name']}, Nom: {joueur['last_name']}")
+    print("\n")
+
+def select_players(joueurs_disponibles, joueurs_selectionnes, min_players, max_players):
+    while True:
+        display_available_players(joueurs_disponibles)
+
+        print(f"Sélectionnez un joueur par son ID (appuyez sur Entrée pour terminer) : ")
+        choice_id = input().strip()
+
+        if not choice_id:
+            if len(joueurs_selectionnes) % 2 != 0 or len(joueurs_selectionnes) < min_players:
+                print(f"Le nombre de joueurs sélectionnés doit être pair et au moins égal à {min_players}.")
+                continue_tournament = input("Voulez-vous ajouter des joueurs supplémentaires ? (Oui/Non) : ")
+                if continue_tournament.lower() == "oui":
+                    continue
+                else:
+                    break
+            else:
+                break
+        elif choice_id.isdigit():
+            player_id = int(choice_id)
+
+            if any(player['id'] == player_id for player in joueurs_selectionnes):
+                print("Ce joueur a déjà été sélectionné. Veuillez réessayer.")
+                continue
+
+            selected_player = next((player for player in joueurs_disponibles if player['id'] == player_id), None)
+
+            if selected_player:
+                joueurs_selectionnes.append(selected_player)
+                joueurs_disponibles.remove(selected_player)
+                print(f"Joueur sélectionné : {selected_player['first_name']} {selected_player['last_name']}")
+            else:
+                print("ID de joueur invalide. Veuillez réessayer.")
+        else:
+            print("ID de joueur invalide. Veuillez réessayer.")
+
+
 def enregistrer_joueur():
     setup_directories()
     clear_screen()
@@ -51,45 +93,11 @@ def enregistrer_joueur():
 
     joueurs_disponibles = joueurs.copy()
 
-
     if os.path.exists(Config.JOUEURS_FILE):
         with open(Config.JOUEURS_FILE, 'r') as file:
             joueurs = json.load(file)
 
-
-    while True:
-        afficher_joueurs_disponibles(joueurs_disponibles)
-        print("Sélectionnez un joueur par son ID (appuyez sur Entrée pour terminer) : ")
-
-        choix_id = input().strip()
-
-        if not choix_id:
-            if len(joueurs_selectionnes) % 2 != 0 or len(joueurs_selectionnes) < 8:
-                print("Le nombre de joueurs sélectionnés doit être pair et au moins égal à 8.")
-                continuer = input("Voulez-vous ajouter des joueurs supplémentaires ? (Oui/Non) : ")
-                if continuer.lower() == "oui":
-                    continue
-                else:
-                    break
-            else:
-                break
-        elif choix_id.isdigit():
-            id_joueur = int(choix_id)
-
-            if any(joueur['id'] == id_joueur for joueur in joueurs_selectionnes):
-                print("Ce joueur a déjà été sélectionné. Veuillez réessayer.")
-                continue
-
-            joueur_selectionne = next((joueur for joueur in joueurs_disponibles if joueur['id'] == id_joueur), None)
-
-            if joueur_selectionne:
-                joueurs_selectionnes.append(joueur_selectionne)
-                joueurs_disponibles.remove(joueur_selectionne)
-                print(f"Joueur sélectionné : {joueur_selectionne['first_name']} {joueur_selectionne['last_name']}")
-            else:
-                print("ID de joueur invalide. Veuillez réessayer.")
-        else:
-            print("ID de joueur invalide. Veuillez réessayer.")
+    select_players(joueurs_disponibles, joueurs_selectionnes, min_players=8, max_players=float('inf'))
 
 def update_player_scores(players, matches):
     for match in matches:
@@ -111,7 +119,6 @@ def update_player_scores(players, matches):
 
 
 def enregistrer_tournoi():
-
     global joueurs
 
     setup_directories()
@@ -133,8 +140,6 @@ def enregistrer_tournoi():
 
     number_of_rounds = int(input("Nombre de rondes : "))
 
-    
-
     afficher_liste_joueurs(avec_message=False)
 
     if os.path.exists(Config.JOUEURS_FILE):
@@ -143,33 +148,7 @@ def enregistrer_tournoi():
 
     joueurs_disponibles = joueurs.copy()
 
-    while True:
-        afficher_joueurs_disponibles(joueurs_disponibles)
-        print("Sélectionnez un joueur par son ID (appuyez sur Entrée pour terminer) : ")
-
-        choix_id = input().strip()
-        if not choix_id:
-            if len(joueurs_selectionnes) % 2 != 0 or len(joueurs_selectionnes) < 2:
-                print("Le nombre de joueurs sélectionnés doit être pair et supérieur ou égal à 2. Annulation de l'enregistrement du tournoi.")
-            else:
-                break
-        elif choix_id.isdigit():
-            id_joueur = int(choix_id)
-
-            if any(joueur['id'] == id_joueur for joueur in joueurs_selectionnes):
-                print("Ce joueur a déjà été sélectionné. Veuillez réessayer.")
-                continue
-
-            joueur_selectionne = next((joueur for joueur in joueurs_disponibles if joueur['id'] == id_joueur), None)
-
-            if joueur_selectionne:
-                joueurs_selectionnes.append(joueur_selectionne)
-                joueurs_disponibles.remove(joueur_selectionne)
-                print(f"Joueur sélectionné : {joueur_selectionne['first_name']} {joueur_selectionne['last_name']}")
-            else:
-                print("ID de joueur invalide. Veuillez réessayer.")
-        else:
-            print("ID de joueur invalide. Veuillez réessayer.")
+    select_players(joueurs_disponibles, joueurs_selectionnes, min_players=2, max_players=float('inf'))
 
     if len(joueurs_selectionnes) % 2 != 0 or len(joueurs_selectionnes) < 2:
         print("Le nombre de joueurs sélectionnés doit être pair et supérieur ou égal à 2. Annulation de l'enregistrement du tournoi.")
@@ -307,6 +286,7 @@ def lancer_rounds(tournoi):
     retour_sous_menu = False
 
     for round_number in range(tournoi['number_of_rounds']):
+
         current_round_start_time = datetime.datetime.now()
         print(f"\nDébut du Round {round_number + 1} - {current_round_start_time}\n")
 
@@ -433,6 +413,7 @@ def setup_directories():
 
     if not os.path.exists(TOURNOIS_DIR):
         os.makedirs(TOURNOIS_DIR)
+
 
 if __name__ == "__main__":
     gestion_tournois()
