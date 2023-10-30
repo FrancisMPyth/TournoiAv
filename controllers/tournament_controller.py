@@ -7,13 +7,16 @@ from models.tournament import Tournament
 from controllers.player_controller import afficher_liste_joueurs
 from config.config import Config
 from models.match import Match
-import datetime
+import datetime 
 from itertools import combinations
 import itertools
 
+
 DATA_DIR = "data"
 TOURNOIS_DIR = os.path.join(DATA_DIR, "tournois")
-TOURNAMENT_DATA_DIR = Config.TOURNOIS_DIR
+TOURNAMENT_DATA_DIR = Config.TOURNOIS_DIR 
+joueurs = []
+joueurs_selectionnes = []
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -34,41 +37,30 @@ def generer_suffixe_unique(name, existing_tournaments):
         i += 1
     return new_name
 
-def afficher_joueurs_disponibles(joueurs):
+def afficher_joueurs_disponibles(joueurs_disponibles):
     print("Liste des joueurs disponibles :\n")
-    for joueur in joueurs:
+    for joueur in joueurs_disponibles:
         print(f"ID: {joueur['id']}, Prénom: {joueur['first_name']}, Nom: {joueur['last_name']}")
     print("\n")
 
-def enregistrer_tournoi():
+def enregistrer_joueur():
     setup_directories()
     clear_screen()
 
-    name = input("Nom du tournoi : ")
-    location = input("Lieu : ")
+    global joueurs_disponibles
 
-    start_date = get_valid_date("Date de début (jj/mm/aaaa) : ")
+    joueurs_disponibles = joueurs.copy()
 
-    while True:
-        end_date = get_valid_date("Date de fin (jj/mm/aaaa) : ")
-        if validate_end_date(start_date, end_date):
-            break
-        else:
-            print("La date de fin doit être égale ou postérieure à la date de début. Veuillez réessayer.")
 
-    number_of_rounds = int(input("Nombre de rondes : "))
-
-    joueurs = []
     if os.path.exists(Config.JOUEURS_FILE):
         with open(Config.JOUEURS_FILE, 'r') as file:
             joueurs = json.load(file)
 
-    joueurs_selectionnes = []
-    afficher_liste_joueurs(avec_message=False)
 
     while True:
-        afficher_joueurs_disponibles(joueurs)
+        afficher_joueurs_disponibles(joueurs_disponibles)
         print("Sélectionnez un joueur par son ID (appuyez sur Entrée pour terminer) : ")
+
         choix_id = input().strip()
 
         if not choix_id:
@@ -83,11 +75,79 @@ def enregistrer_tournoi():
                 break
         elif choix_id.isdigit():
             id_joueur = int(choix_id)
-            joueur_selectionne = next((joueur for joueur in joueurs if joueur['id'] == id_joueur), None)
+
+            if any(joueur['id'] == id_joueur for joueur in joueurs_selectionnes):
+                print("Ce joueur a déjà été sélectionné. Veuillez réessayer.")
+                continue
+
+            joueur_selectionne = next((joueur for joueur in joueurs_disponibles if joueur['id'] == id_joueur), None)
 
             if joueur_selectionne:
                 joueurs_selectionnes.append(joueur_selectionne)
-                joueurs.remove(joueur_selectionne)
+                joueurs_disponibles.remove(joueur_selectionne)
+                print(f"Joueur sélectionné : {joueur_selectionne['first_name']} {joueur_selectionne['last_name']}")
+            else:
+                print("ID de joueur invalide. Veuillez réessayer.")
+        else:
+            print("ID de joueur invalide. Veuillez réessayer.")
+
+
+
+def enregistrer_tournoi():
+
+    global joueurs
+
+    setup_directories()
+    clear_screen()
+
+    name = input("Nom du tournoi : ")
+    location = input("Lieu : ")
+
+    start_date = get_valid_date("Date de début (jj/mm/aaaa) : ")
+
+    joueurs_disponibles = joueurs.copy()
+
+    while True:
+        end_date = get_valid_date("Date de fin (jj/mm/aaaa) : ")
+        if validate_end_date(start_date, end_date):
+            break
+        else:
+            print("La date de fin doit être égale ou postérieure à la date de début. Veuillez réessayer.")
+
+    number_of_rounds = int(input("Nombre de rondes : "))
+
+    
+
+    afficher_liste_joueurs(avec_message=False)
+
+    if os.path.exists(Config.JOUEURS_FILE):
+        with open(Config.JOUEURS_FILE, 'r') as file:
+            joueurs = json.load(file)
+
+    joueurs_disponibles = joueurs.copy()
+
+    while True:
+        afficher_joueurs_disponibles(joueurs_disponibles)
+        print("Sélectionnez un joueur par son ID (appuyez sur Entrée pour terminer) : ")
+
+        choix_id = input().strip()
+        if not choix_id:
+            if len(joueurs_selectionnes) % 2 != 0 or len(joueurs_selectionnes) < 2:
+                print("Le nombre de joueurs sélectionnés doit être pair et supérieur ou égal à 2. Annulation de l'enregistrement du tournoi.")
+            else:
+                break
+        elif choix_id.isdigit():
+            id_joueur = int(choix_id)
+
+            if any(joueur['id'] == id_joueur for joueur in joueurs_selectionnes):
+                print("Ce joueur a déjà été sélectionné. Veuillez réessayer.")
+                continue
+
+            joueur_selectionne = next((joueur for joueur in joueurs_disponibles if joueur['id'] == id_joueur), None)
+
+            if joueur_selectionne:
+                joueurs_selectionnes.append(joueur_selectionne)
+                joueurs_disponibles.remove(joueur_selectionne)
                 print(f"Joueur sélectionné : {joueur_selectionne['first_name']} {joueur_selectionne['last_name']}")
             else:
                 print("ID de joueur invalide. Veuillez réessayer.")
@@ -122,6 +182,8 @@ def validate_end_date(start_date, end_date):
     start_date_obj = datetime.datetime.strptime(start_date, '%d/%m/%Y')
     end_date_obj = datetime.datetime.strptime(end_date, '%d/%m/%Y')
     return end_date_obj >= start_date_obj
+
+
 
 def afficher_liste_tournois():
     setup_directories()
@@ -212,8 +274,8 @@ def lancer_rounds(tournoi):
     else:
         tournoi['players'].sort(key=lambda x: x['score'], reverse=True)
 
-    tournoi['current_round'] += 1  # Mise à jour du nombre de rounds actuel
-    tournoi['rounds'] = []  # Initialisation de la liste des rounds pour le tour actuel
+    tournoi['current_round'] += 1 
+    tournoi['rounds'] = []  
     retour_sous_menu = False
 
     for round_number in range(tournoi['number_of_rounds']):
@@ -306,7 +368,7 @@ def generate_matches(players):
         player1 = players.pop(0)
         player2 = players.pop(0)
 
-        match = Match(player1['id'], player2['id'])
+        match = Match(player1['id'], player2['id'])  
         matches.append({'match': match, 'player1': player1, 'player2': player2})
 
     return matches
