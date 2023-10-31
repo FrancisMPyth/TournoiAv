@@ -237,9 +237,8 @@ def gestion_tournois():
     while True:
         clear_screen()
         print("Gestion des tournois en cours...\n")
-        print("1. Gérer le Tournoi")
-        print("2. Saisir les résultats des matchs")
-        print("3. Menu")
+        print("1. Gérer les Tournois")
+        print("M. Menu")
 
         choix = input("\nEntrez le numéro de votre choix : ")
 
@@ -247,9 +246,8 @@ def gestion_tournois():
             tournoi = choisir_tournoi()
             if tournoi:
                 lancer_rounds(tournoi)
-        elif choix == "2":
-            saisir_resultats()
-        elif choix == "3":
+        
+        elif choix == "M":
             break
         else:
             print("Choix invalide. Veuillez réessayer.")
@@ -407,14 +405,14 @@ def choisir_tournoi():
 
     tournois_disponibles = tournois
 
-
     if not tournois_disponibles:
         print("Aucun tournoi disponible pour le lancement.")
         input("Appuyez sur Entrée pour continuer...")
         return None
 
     for tournoi in tournois_disponibles:
-        print(f"ID: {tournoi['tournament_id']}, Nom: {tournoi['name']}")
+        etat_tournoi = "En cours" if tournoi.get('current_round', 0) > 0 else "Non commencé"
+        print(f"ID: {tournoi['tournament_id']}, Nom: {tournoi['name']}, État: {etat_tournoi}")
 
     tournoi_id = input("Saisissez l'ID du tournoi choisi : ")
     selected_tournoi = next((tournoi for tournoi in tournois_disponibles if tournoi['tournament_id'] == tournoi_id), None)
@@ -424,7 +422,6 @@ def choisir_tournoi():
     else:
         print("ID de tournoi invalide. Veuillez réessayer.")
         return None
-    
 
 
     
