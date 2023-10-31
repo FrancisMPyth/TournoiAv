@@ -286,9 +286,9 @@ def lancer_rounds(tournoi):
     retour_sous_menu = False
 
     for round_number in range(tournoi['number_of_rounds']):
-
         current_round_start_time = datetime.datetime.now()
-        print(f"\nDébut du Round {round_number + 1} - {current_round_start_time}\n")
+        formatted_start_time = current_round_start_time.strftime("%H:%M")
+        print(f"\nDébut du Round {round_number + 1} - {formatted_start_time}\n")
 
         matches = generate_matches(tournoi['players'])
 
