@@ -337,6 +337,8 @@ def afficher_liste_tournois_en_cours():
         print("Liste des tournois en cours :\n")
         for tournoi in tournois_en_cours:
             print(f"ID: {tournoi['tournament_id']}")
+            print(f"Nom: {tournoi['name']}")
+            print(f"Round en cours: {tournoi['current_round']}/{tournoi['number_of_rounds']}\n")
 
         choix = input("\nSaisissez l'ID du tournoi que vous souhaitez gérer (ou appuyez sur Entrée pour retourner au menu) : ")
         
