@@ -336,45 +336,17 @@ def afficher_liste_tournois_en_cours():
     else:
         print("Liste des tournois en cours :\n")
         for tournoi in tournois_en_cours:
-            print(f"\nID: {tournoi['tournament_id']}")
-            print(f"Nom: {tournoi['name']}")
-            print(f"Lieu: {tournoi['location']}")
-            print(f"Date début: {tournoi['start_date']}")
-            print(f"Date fin: {tournoi['end_date']}")
-            print(f"Nombre de rondes: {tournoi['number_of_rounds']}")
-            
-            print(f"Tour en cours: {tournoi['current_round']}/{tournoi['number_of_rounds']}")
+            print(f"ID: {tournoi['tournament_id']}")
 
-            print("\nJoueurs:")
-            for joueur in tournoi['players']:
-                print(f"ID: {joueur['id']}, Nom: {joueur['first_name']} {joueur['last_name']}, "
-                    f"Score: {joueur.get('score', 'N/A')}")
+        choix = input("\nSaisissez l'ID du tournoi que vous souhaitez gérer (ou appuyez sur Entrée pour retourner au menu) : ")
+        
+        if choix:
+            # Gérer le tournoi choisi (tu devras implémenter cette partie)
+            print(f"Vous avez choisi de gérer le tournoi avec l'ID : {choix}")
+            # Appelle la fonction pour gérer le tournoi (à implémenter)
+        else:
+            print("Retour au menu principal.")
 
-            if 'rounds' in tournoi and tournoi['rounds']:
-                current_round_number = tournoi['current_round']
-                current_round_matches = tournoi['rounds'][current_round_number - 1]['matches']
-
-                print("\nMatchs en cours :")
-                for match in current_round_matches:
-                    print(f"Match entre {match['player1']['name']} et {match['player2']['name']}")
-                    print(f"Score : {match['player1']['score']} - {match['player2']['score']}")
-                    print(f"Heure de début : {match['start_time']}\n")
-
-                print("1. Saisir les résultats des matchs")
-                print("2. Retour au menu")
-
-                choix = input("\nEntrez le numéro de votre choix : ")
-
-                if choix == "1":
-                    saisir_resultats_matchs(tournoi, current_round_matches)
-                elif choix == "2":
-                    continue  
-                else:
-                    print("Choix invalide. Retour au menu...\n")
-
-            input("Appuyez sur Entrée pour revenir au menu...")
-
-    print("Fin de l'affichage des tournois en cours.")
 
 def saisir_resultats_matchs(tournoi, round_details):
     clear_screen()
