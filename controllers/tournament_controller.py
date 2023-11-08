@@ -233,7 +233,6 @@ def afficher_liste_tournois():
         else:
             print("Retour au menu principal.")
 
-    input("Appuyez sur Entrée pour continuer...")
 
 def load_all_tournaments():
     tournois = []
@@ -257,8 +256,7 @@ def gerer_tournois_en_cours():
         if choix.lower() == 'm':
             break
         elif not choix.strip():
-            # Si l'entrée est vide, retourne au sous-menu
-            return  # Ajoutez cette ligne pour sortir de la fonction
+            return  
 
         tournoi = trouver_tournoi_par_id(choix)
         if tournoi:
@@ -295,7 +293,12 @@ def afficher_details_tournoi(tournoi):
 
             print(f"\nMatch entre {joueur1['first_name']} {joueur1['last_name']} et {joueur2['first_name']} {joueur2['last_name']}")
             print(f"Score : {match['player1']['score']} - {match['player2']['score']}")
-            print(f"Heure de début : {match['start_time']}\n")
+            print(f"Heure de début : {match['start_time']}")
+            
+            if 'end_time' in match:
+                print(f"Heure de fin : {match['end_time']}\n")
+            else:
+                print("\n")
 
         print("1. Saisir les résultats des matchs")
         print("2. Revenir au menu principal")
@@ -310,9 +313,8 @@ def afficher_details_tournoi(tournoi):
             print("Choix invalide. Retour au menu principal.")
     else:
         print("Aucun round n'a encore été joué.")
-    
-    input("Appuyez sur Entrée pour continuer...")
 
+    
 
 def gerer_resultats_matchs(tournoi):
     current_round_number = tournoi['current_round']
@@ -352,7 +354,7 @@ def gerer_resultats_matchs(tournoi):
             print("\nGérer les Tournois en cours")
 
             entering_results = True  
-    return
+        return
 
 
 def saisir_resultats_match(tournoi, match_details):
@@ -380,7 +382,6 @@ def saisir_resultats_match(tournoi, match_details):
     match_details['player2']['score'] = score_player2
     match_details['resultats_saisis'] = True
     
-    # Ajoute le champ "end_time" même si les résultats ne sont pas saisis
     match_details['end_time'] = datetime.datetime.now().strftime("%H:%M")
 
     save_tournament_data(tournoi)
@@ -433,7 +434,6 @@ def afficher_liste_tournois_en_cours():
             tournoi_choisi = trouver_tournoi_par_id(choix)
             if tournoi_choisi:
                 afficher_details_tournoi(tournoi_choisi)
-                # Appelle la fonction pour gérer le tournoi (à implémenter)
             else:
                 print("ID de tournoi invalide. Veuillez réessayer.")
         else:
@@ -464,7 +464,7 @@ def lancer_premier_round(tournoi):
 
     tournoi['current_round'] += 1
     tournoi['rounds'] = []
-    tournoi['start_time'] = datetime.datetime.now().strftime("%H:%M")  # Ajout de l'heure de début
+    tournoi['start_time'] = datetime.datetime.now().strftime("%H:%M")  
 
     formatted_start_time = tournoi['start_time']
     print(f"\nDébut du Premier Round - {formatted_start_time}\n")
@@ -476,14 +476,14 @@ def lancer_premier_round(tournoi):
     for match in matches:
         print(f"Match entre {match['player1']['first_name']} {match['player1']['last_name']} "
               f"et {match['player2']['first_name']} {match['player2']['last_name']} "
-              f"- Début à {match['start_time']}")  # Ajout de l'heure de début du match
+              f"- Début à {match['start_time']}")  
 
         match_details = {
             'player1': {'id': match['player1']['id'], 'score': 0,
                         'name': f"{match['player1']['first_name']} {match['player1']['last_name']}"},
             'player2': {'id': match['player2']['id'], 'score': 0,
                         'name': f"{match['player2']['first_name']} {match['player2']['last_name']}"},
-            'start_time': match['start_time']  # Enregistrement de l'heure de début du match
+            'start_time': match['start_time']  
         }
         round_details['matches'].append(match_details)
 
