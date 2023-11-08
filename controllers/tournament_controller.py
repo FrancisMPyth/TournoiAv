@@ -201,51 +201,39 @@ def afficher_liste_tournois():
     setup_directories()
     clear_screen()
 
-    tournois = []
-    if os.path.exists(Config.TOURNOIS_DIR):
-        for filename in os.listdir(Config.TOURNOIS_DIR):
-            if filename.endswith(".json"):
-                with open(os.path.join(Config.TOURNOIS_DIR, filename), 'r') as file:
-                    tournoi = json.load(file)
-                    tournois.append(tournoi)
+    tournois = load_all_tournaments()
 
     if not tournois:
         print("Aucun tournoi enregistré.")
     else:
         print("Liste des tournois :\n")
         for tournoi in tournois:
-            print(f"\nID: {tournoi['tournament_id']}")
+            print(f"ID: {tournoi['tournament_id']}")
             print(f"Nom: {tournoi['name']}")
             print(f"Lieu: {tournoi['location']}")
             print(f"Date début: {tournoi['start_date']}")
             print(f"Date fin: {tournoi['end_date']}")
             print(f"Nombre de rondes: {tournoi['number_of_rounds']}")
-            
-            if tournoi['current_round'] == 0:
+
+            if tournoi.get('current_round', 0) == 0:
                 print("Le tournoi n'a pas encore commencé.")
             else:
                 print(f"Tour en cours: {tournoi['current_round']}/{tournoi['number_of_rounds']}")
 
-                print("\nJoueurs:")
-                for joueur in tournoi['players']:
-                    print(f"ID: {joueur['id']}, Nom: {joueur['first_name']} {joueur['last_name']}, "
-                        f"Score: {joueur.get('score', 'N/A')}")
+            print()
 
-                if 'rounds' in tournoi and tournoi['rounds']:
-                    current_round_number = tournoi['current_round']
-                    current_round_matches = tournoi['rounds'][current_round_number - 1]['matches']
+        selected_tournament_id = input("Entrez l'ID du tournoi que vous souhaitez afficher (ou appuyez sur Entrée pour revenir au menu) : ").strip()
 
-                    print("\nMatchs en cours :")
-                    for match in current_round_matches:
-                        print(f"Match entre {match['player1']['name']} et {match['player2']['name']}")
-                        print(f"Score : {match['player1']['score']} - {match['player2']['score']}")
-                        print(f"Heure de début : {match['start_time']}\n")
+        if selected_tournament_id:
+            selected_tournament = trouver_tournoi_par_id(selected_tournament_id)
+            if selected_tournament:
+                afficher_details_tournoi(selected_tournament)
+            else:
+                print("ID de tournoi invalide. Veuillez réessayer.")
+        else:
+            print("Retour au menu principal.")
 
-                print("Appuyez sur Entrée pour continuer...")
-                input()  
-
-    print("Fin de l'affichage de l'historique des tournois.")
-
+    input("Appuyez sur Entrée pour continuer...")
 
 def load_all_tournaments():
     tournois = []
@@ -268,11 +256,15 @@ def gerer_tournois_en_cours():
 
         if choix.lower() == 'm':
             break
-        else:
-            tournoi = trouver_tournoi_par_id(choix)
-            if tournoi:
-                afficher_details_tournoi(tournoi)
-                gerer_resultats_matchs(tournoi)
+        elif not choix.strip():
+            # Si l'entrée est vide, retourne au sous-menu
+            return  # Ajoutez cette ligne pour sortir de la fonction
+
+        tournoi = trouver_tournoi_par_id(choix)
+        if tournoi:
+            afficher_details_tournoi(tournoi)
+            gerer_resultats_matchs(tournoi)
+
 
 def trouver_tournoi_par_id(tournoi_id):
     tournois_en_cours = load_all_tournaments()
@@ -305,40 +297,62 @@ def afficher_details_tournoi(tournoi):
             print(f"Score : {match['player1']['score']} - {match['player2']['score']}")
             print(f"Heure de début : {match['start_time']}\n")
 
-        gerer_resultats_matchs(tournoi)
+        print("1. Saisir les résultats des matchs")
+        print("2. Revenir au menu principal")
+
+        choix = input("\nEntrez le numéro de votre choix : ")
+
+        if choix == "1":
+            gerer_resultats_matchs(tournoi)
+        elif choix == "2":
+            return
+        else:
+            print("Choix invalide. Retour au menu principal.")
+    else:
+        print("Aucun round n'a encore été joué.")
+    
+    input("Appuyez sur Entrée pour continuer...")
+
 
 def gerer_resultats_matchs(tournoi):
     current_round_number = tournoi['current_round']
     current_round_matches = tournoi['rounds'][current_round_number - 1]['matches']
-
+    entering_results = True  
     while True:
-        clear_screen()
-        print("Saisir les résultats des matchs...\n")
+        if entering_results:
+            clear_screen()
+            print("Saisir les résultats des matchs...\n")
 
-        for i, match_details in enumerate(current_round_matches, start=1):
-            player1_name = match_details['player1']['name']
-            player2_name = match_details['player2']['name']
+            for i, match_details in enumerate(current_round_matches, start=1):
+                player1_name = match_details['player1']['name']
+                player2_name = match_details['player2']['name']
 
-            resultats_saisis = match_details.get('resultats_saisis', False)
+                resultats_saisis = match_details.get('resultats_saisis', False)
 
-            if resultats_saisis:
-                print(f"{i}. Résultats déjà saisis pour le match entre {player1_name} et {player2_name}")
+                if resultats_saisis:
+                    print(f"{i}. Résultats déjà saisis pour le match entre {player1_name} et {player2_name}")
+                else:
+                    print(f"{i}. Saisir les résultats pour le match entre {player1_name} et {player2_name}")
+
+            choix = input("\nEntrez le numéro du match que vous souhaitez gérer (ou appuyez sur Entrée pour revenir à la gestion des tournois en cours) : ")
+
+            if choix.isdigit() and 1 <= int(choix) <= len(current_round_matches):
+                selected_match = current_round_matches[int(choix) - 1]
+
+                if selected_match.get('resultats_saisis', False):
+                    print("Les résultats de ce match ont déjà été saisis. Veuillez choisir un autre match.")
+                else:
+                    saisir_resultats_match(tournoi, selected_match)
+            elif not choix.strip():
+                entering_results = False 
+                return
             else:
-                print(f"{i}. Saisir les résultats pour le match entre {player1_name} et {player2_name}")
-
-        choix = input("\nEntrez le numéro du match que vous souhaitez gérer (ou appuyez sur 'M' pour revenir au menu) : ")
-
-        if choix.lower() == 'm':
-            break
-        elif choix.isdigit() and 1 <= int(choix) <= len(current_round_matches):
-            selected_match = current_round_matches[int(choix) - 1]
-
-            if selected_match.get('resultats_saisis', False):
-                print("Les résultats de ce match ont déjà été saisis. Veuillez choisir un autre match.")
-            else:
-                saisir_resultats_match(tournoi, selected_match)
+                print("Choix invalide. Veuillez réessayer.")
         else:
-            print("Choix invalide. Veuillez réessayer.")
+            print("\nGérer les Tournois en cours")
+
+            entering_results = True  
+    return
 
 
 def saisir_resultats_match(tournoi, match_details):
@@ -365,11 +379,15 @@ def saisir_resultats_match(tournoi, match_details):
     match_details['player1']['score'] = score_player1
     match_details['player2']['score'] = score_player2
     match_details['resultats_saisis'] = True
+    
+    # Ajoute le champ "end_time" même si les résultats ne sont pas saisis
+    match_details['end_time'] = datetime.datetime.now().strftime("%H:%M")
 
     save_tournament_data(tournoi)
 
     print("Résultats enregistrés avec succès !\n")
     input("Appuyez sur Entrée pour continuer...")
+
 
 
 
@@ -420,29 +438,6 @@ def afficher_liste_tournois_en_cours():
                 print("ID de tournoi invalide. Veuillez réessayer.")
         else:
             print("Retour au menu principal.")
-
-
-
-
-def saisir_resultats_matchs(tournoi, round_details):
-    clear_screen()
-    print("Saisir les résultats des matchs...\n")
-
-    for match_details in round_details['matches']:
-        player1_name = match_details['player1']['name']
-        player2_name = match_details['player2']['name']
-
-        print(f"Match entre {player1_name} et {player2_name}")
-        score_player1 = int(input(f"Score pour {player1_name} : "))
-        score_player2 = int(input(f"Score pour {player2_name} : "))
-
-        match_details['player1']['score'] = score_player1
-        match_details['player2']['score'] = score_player2
-
-    save_tournament_data(tournoi)
-
-    print("Résultats enregistrés avec succès !\n")
-    input("Appuyez sur Entrée pour revenir au menu...")
 
 
 
