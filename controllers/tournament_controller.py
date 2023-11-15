@@ -86,10 +86,9 @@ def select_players(joueurs_disponibles, joueurs_selectionnes, min_players, max_p
 
 
 def enregistrer_joueur():
+    global joueurs  
     setup_directories()
     clear_screen()
-
-    global joueurs_disponibles
 
     joueurs_disponibles = joueurs.copy()
 
@@ -100,6 +99,7 @@ def enregistrer_joueur():
     select_players(joueurs_disponibles, joueurs_selectionnes, min_players=8, max_players=float('inf'))
 
 def load_all_players():
+    global joueurs
     joueurs = []
     if os.path.exists(Config.JOUEURS_FILE):
         with open(Config.JOUEURS_FILE, 'r') as file:
@@ -135,8 +135,7 @@ def update_player_scores(players, matches):
 
 
 def enregistrer_tournoi():
-    global joueurs
-
+    global joueurs, tournament  
     setup_directories()
     clear_screen()
 
@@ -156,7 +155,8 @@ def enregistrer_tournoi():
 
     number_of_rounds = int(input("Nombre de rondes : "))
 
-    afficher_liste_joueurs(avec_message=False)
+    # Affiche la liste des joueurs disponibles
+    afficher_liste_joueurs(joueurs_disponibles)
 
     if os.path.exists(Config.JOUEURS_FILE):
         with open(Config.JOUEURS_FILE, 'r') as file:
@@ -164,9 +164,14 @@ def enregistrer_tournoi():
 
     joueurs_disponibles = joueurs.copy()
 
+    # Sélectionne les joueurs
+    joueurs_selectionnes = []  # Ajoutez cette ligne pour initialiser la liste
     select_players(joueurs_disponibles, joueurs_selectionnes, min_players=2, max_players=float('inf'))
 
-    if len(joueurs_selectionnes) % 2 != 0 or len(joueurs_selectionnes) < 2:
+    # Ajoute les joueurs sélectionnés à la liste des joueurs du tournoi
+    joueurs_du_tournoi = joueurs_selectionnes.copy()
+
+    if len(joueurs_du_tournoi) % 2 != 0 or len(joueurs_du_tournoi) < 2:
         print("Le nombre de joueurs sélectionnés doit être pair et supérieur ou égal à 2. Annulation de l'enregistrement du tournoi.")
     else:
         tournament = Tournament()
@@ -176,7 +181,7 @@ def enregistrer_tournoi():
             start_date=start_date,
             end_date=end_date,
             number_of_rounds=number_of_rounds,
-            players=joueurs_selectionnes
+            players=joueurs_du_tournoi  # Utilise la liste des joueurs sélectionnés
         )
 
         tournament.save()
@@ -410,45 +415,30 @@ def lancer_prochain_round(tournoi):
 
     tournoi['rounds'].append(round_details)
 
+    tournoi['ranking'] = generate_tournament_ranking(tournoi['players'], tournoi)
     save_tournament_data(tournoi)
 
     print(f"Round {current_round_number + 1} terminé.")
     input("Appuyez sur Entrée pour revenir au sous-menu...")
 
 
-def gerer_resultats_matchs(tournoi):
-    current_round_number = tournoi['current_round']
-    current_round_matches = tournoi['rounds'][current_round_number - 1]['matches']
+def generate_matches(players, formatted_start_time):
+    matches = []
+    num_players = len(players)
 
-    while True:
-        clear_screen()
-        print("Saisir les résultats des matchs...\n")
+    if num_players % 2 != 0:
+        raise ValueError("Le nombre de joueurs doit être pair.")
 
-        for i, match_details in enumerate(current_round_matches, start=1):
-            player1_name = match_details['player1']['name']
-            player2_name = match_details['player2']['name']
+    random.shuffle(players)
 
-            resultats_saisis = match_details.get('resultats_saisis', False)
+    while len(players) >= 2:
+        player1 = players.pop(0)
+        player2 = players.pop(0)
 
-            if resultats_saisis:
-                print(f"{i}. Résultats déjà saisis pour le match entre {player1_name} et {player2_name}")
-            else:
-                print(f"{i}. Saisir les résultats pour le match entre {player1_name} et {player2_name}")
+        match = Match(player1['id'], player2['id'], start_time=formatted_start_time)
+        matches.append({'match': match, 'player1': player1, 'player2': player2, 'start_time': formatted_start_time})
 
-        choix = input("\nEntrez le numéro du match que vous souhaitez gérer (ou appuyez sur Entrée pour revenir à la gestion des tournois en cours) : ")
-
-        if choix.isdigit() and 1 <= int(choix) <= len(current_round_matches):
-            selected_match = current_round_matches[int(choix) - 1]
-
-            if selected_match.get('resultats_saisis', False):
-                print("Les résultats de ce match ont déjà été saisis. Veuillez choisir un autre match.")
-            else:
-                saisir_resultats_match(tournoi, selected_match)
-        elif not choix.strip():
-            break
-        else:
-            print("Choix invalide. Veuillez réessayer.")
-
+    return matches
 
 
 def saisir_resultats_match(tournoi, match_details):
@@ -536,45 +526,30 @@ def afficher_liste_tournois_en_cours():
 
 
 
+def generate_player_ranking(tournament_data):
+    players = tournament_data.get('players', [])
+    player_results = {}
+
+    for round_data in tournament_data.get('rounds', []):
+        for match in round_data.get('matches', []):
+            for player_data in [match['player1'], match['player2']]:
+                player_id = player_data['id']
+                player_name = player_data['name']
+                player_score = player_data['score']
+
+                if player_id not in player_results:
+                    player_results[player_id] = {'name': player_name, 'score': 0}
+
+                player_results[player_id]['score'] += player_score
+
+    ranking = list(player_results.values())
+    ranking.sort(key=lambda x: x['score'], reverse=True)
+
+    return ranking
 
 
-
-def generate_matches(players):
-    matches = []
-    num_players = len(players)
-
-    if num_players % 2 != 0:
-        raise ValueError("Le nombre de joueurs doit être pair.")
-
-    random.shuffle(players)
-
-    while len(players) >= 2:
-        player1 = players.pop(0)
-        player2 = players.pop(0)
-
-        match_start_time = datetime.datetime.now()
-        formatted_match_start_time = match_start_time.strftime("%H:%M")
-
-        match = Match(player1['id'], player2['id'], start_time=formatted_match_start_time)
-        matches.append({'match': match, 'player1': player1, 'player2': player2, 'start_time': formatted_match_start_time})
-
-    return matches
-
-
-def save_tournament_data(tournoi):
-    if 'tournament_id' not in tournoi:
-        print("Erreur: Impossible de sauvegarder les données du tournoi, l'identifiant du tournoi est manquant.")
-        return
-
-    for player in tournoi['players']:
-        player_id = player['id']
-        matching_player = next((p for p in tournoi['players'] if p['id'] == player_id), None)
-        if matching_player:
-            player['name'] = f"{matching_player['first_name']} {matching_player['last_name']}"
-
-    file_path = os.path.join(TOURNOIS_DIR, f"{tournoi['tournament_id']}.json")
-    with open(file_path, 'w') as file:
-        json.dump(tournoi, file, indent=4)
+if __name__ == "__main__":
+    gestion_tournois()
 
 def afficher_suivi_rounds(tournoi):
     if 'round_results' not in tournoi or not tournoi['round_results']:
@@ -591,31 +566,15 @@ def afficher_suivi_rounds(tournoi):
 
 
 
-def update_player_scores(players, player_id, score):
-    for player in players:
+def update_player_scores(player_id, score):
+    global joueurs
+
+    for player in joueurs:
         if player['id'] == player_id:
             player['score'] += score
-    return players
-
-def generate_matches(players, formatted_start_time):
-    matches = []
-    num_players = len(players)
-
-    if num_players % 2 != 0:
-        raise ValueError("Le nombre de joueurs doit être pair.")
-
-    random.shuffle(players)
-
-    while len(players) >= 2:
-        player1 = players.pop(0)
-        player2 = players.pop(0)
-
-        match = Match(player1['id'], player2['id'], start_time=formatted_start_time)
-        matches.append({'match': match, 'player1': player1, 'player2': player2, 'start_time': formatted_start_time})
-
-    return matches
 
 def choisir_tournoi():
+
     clear_screen()
     print("Choisir un tournoi par son ID :")
 
@@ -642,9 +601,140 @@ def choisir_tournoi():
     
 
 
+def calculate_tournament_score(player_id, tournament):
+    total_score = 0
+
+    for round_data in tournament.get('rounds', []):
+        for match in round_data.get('matches', []):
+            for player_data in [match['player1'], match['player2']]:
+                if player_data['id'] == player_id:
+                    total_score += player_data['score']
+
+    return total_score
+
+
+def generate_tournament_ranking(players, tournament):
+    ranking = []
+
+    for player in players:
+        player_id = player['id']
+        total_score = calculate_tournament_score(player_id, tournament)
+        ranking.append({'id': player_id, 'name': player['name'], 'total_score': total_score})
+
+    ranking.sort(key=lambda x: x['total_score'], reverse=True)
+
+    return ranking
+
+def update_player_ranking(tournoi, player_id, score):
+    # Rechercher le joueur dans le classement du tournoi
+    player_found = False
+    for player in tournoi['ranking']:
+        if player['id'] == player_id:
+            player['score'] += score
+            player_found = True
+            break
+
+    if not player_found:
+        tournoi['ranking'].append({
+            'id': player_id,
+            'score': score,
+        })
+
+
+
+
+def update_tournament_ranking(tournoi):
+    current_round_matches = tournoi['rounds'][tournoi['current_round'] - 1]['matches']
+
+    for match in current_round_matches:
+        player1 = match['player1']
+        player2 = match['player2']
+
+        update_player_ranking(tournoi, player1['id'], player1['score'])
+
+        update_player_ranking(tournoi, player2['id'], player2['score'])
+
+    tournoi['ranking'].sort(key=lambda x: x['score'], reverse=True)
+
+
+
+def display_tournament_ranking(ranking, tournament_name):
+    print(f"\nClassement du tournoi '{tournament_name}' :\n")
+    for i, player in enumerate(ranking, start=1):
+        print(f"{i}. {player['name']} - Score total : {player['total_score']}")
+
+
+def display_all_tournament_rankings():
+    tournois = load_all_tournaments()
+
+    if not tournois:
+        print("Aucun tournoi enregistré.")
+    else:
+        for tournoi in tournois:
+            tournament_name = tournoi['name']
+            players = tournoi.get('players', [])
+            ranking = generate_tournament_ranking(players, tournoi)
+            display_tournament_ranking(ranking, tournament_name)
+
+def gerer_resultats_matchs(tournoi):
+    current_round_number = tournoi['current_round']
+    current_round_matches = tournoi['rounds'][current_round_number - 1]['matches']
+
+    while True:
+        clear_screen()
+        print("Saisir les résultats des matchs...\n")
+
+        for i, match_details in enumerate(current_round_matches, start=1):
+            player1_name = match_details['player1']['name']
+            player2_name = match_details['player2']['name']
+
+            resultats_saisis = match_details.get('resultats_saisis', False)
+
+            if resultats_saisis:
+                print(f"{i}. Résultats déjà saisis pour le match entre {player1_name} et {player2_name}")
+            else:
+                print(f"{i}. Saisir les résultats pour le match entre {player1_name} et {player2_name}")
+
+        choix = input("\nEntrez le numéro du match que vous souhaitez gérer (ou appuyez sur Entrée pour revenir à la gestion des tournois en cours) : ")
+
+        if choix.isdigit() and 1 <= int(choix) <= len(current_round_matches):
+            selected_match = current_round_matches[int(choix) - 1]
+
+            if selected_match.get('resultats_saisis', False):
+                print("Les résultats de ce match ont déjà été saisis. Veuillez choisir un autre match.")
+            else:
+                saisir_resultats_match(tournoi, selected_match)
+                update_tournament_ranking(tournoi)
+        elif not choix.strip():
+            break
+        else:
+            print("Choix invalide. Veuillez réessayer.")
+
+def save_tournament_data(tournoi):
+    if 'tournament_id' not in tournoi:
+        print("Erreur: Impossible de sauvegarder les données du tournoi, l'identifiant du tournoi est manquant.")
+        return
+
+    tournoi_to_save = {
+        'tournament_id': tournoi['tournament_id'],
+        'name': tournoi['name'],
+        'location': tournoi['location'],
+        'start_date': tournoi['start_date'],
+        'end_date': tournoi['end_date'],
+        'number_of_rounds': tournoi['number_of_rounds'],
+        'current_round': tournoi.get('current_round', 0),
+        'ranking': tournoi.get('ranking', []),
+        'rounds': tournoi.get('rounds', [])
+    }
+
+    file_path = os.path.join(TOURNOIS_DIR, f"{tournoi['tournament_id']}.json")
+    with open(file_path, 'w') as file:
+        json.dump(tournoi_to_save, file, indent=4)
+
 
     
 def setup_directories():
+    global TOURNOIS_DIR
     if not os.path.exists(DATA_DIR):
         os.makedirs(DATA_DIR)
 

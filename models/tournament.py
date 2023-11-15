@@ -53,9 +53,34 @@ class Tournament:
         with open(file_path, "w") as file:
             json.dump(self.__dict__, file, indent=4)
 
+    def generate_player_ranking(self):
+        ranking = sorted(self.players, key=lambda x: x.score, reverse=True)
+        return ranking
+
+
+
+
+
     def next_round(self):
         if self.current_round < self.number_of_rounds:
             self.current_round += 1
             new_round = Round()
             self.rounds.append(new_round.generate_new_round_from_tournament(self))
+
+            for match in self.rounds[-1].matches:
+                player1 = match['player1']
+                player2 = match['player2']
+                player1.update_score(match['player1_score'])
+                player2.update_score(match['player2_score'])
+
+            ranking = self.generate_player_ranking()
             self.save()
+
+
+
+
+    def save_ranking(self, ranking):
+        self.ranking = ranking 
+        file_path = os.path.join(Config.TOURNOIS_DIR, f"{self.tournament_id}.json")
+        with open(file_path, "w") as file:
+            json.dump(self.__dict__, file, indent=4)
