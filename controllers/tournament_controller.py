@@ -155,7 +155,6 @@ def enregistrer_tournoi():
 
     number_of_rounds = int(input("Nombre de rondes : "))
 
-    # Affiche la liste des joueurs disponibles
     afficher_liste_joueurs(joueurs_disponibles)
 
     if os.path.exists(Config.JOUEURS_FILE):
@@ -164,11 +163,9 @@ def enregistrer_tournoi():
 
     joueurs_disponibles = joueurs.copy()
 
-    # Sélectionne les joueurs
-    joueurs_selectionnes = []  # Ajoutez cette ligne pour initialiser la liste
+    joueurs_selectionnes = []  
     select_players(joueurs_disponibles, joueurs_selectionnes, min_players=2, max_players=float('inf'))
 
-    # Ajoute les joueurs sélectionnés à la liste des joueurs du tournoi
     joueurs_du_tournoi = joueurs_selectionnes.copy()
 
     if len(joueurs_du_tournoi) % 2 != 0 or len(joueurs_du_tournoi) < 2:
@@ -181,7 +178,7 @@ def enregistrer_tournoi():
             start_date=start_date,
             end_date=end_date,
             number_of_rounds=number_of_rounds,
-            players=joueurs_du_tournoi  # Utilise la liste des joueurs sélectionnés
+            players=joueurs_du_tournoi  
         )
 
         tournament.save()
@@ -441,37 +438,6 @@ def generate_matches(players, formatted_start_time):
     return matches
 
 
-def saisir_resultats_match(tournoi, match_details):
-    clear_screen()
-    print("Saisir les résultats du match...\n")
-
-    player1_name = match_details['player1']['name']
-    player2_name = match_details['player2']['name']
-
-    print(f"Match entre {player1_name} (1) et {player2_name} (2)")
-    gagnant = input("Qui est le gagnant (1, 2, N pour match nul) : ")
-
-    if gagnant.lower() == 'n':
-        score_player1 = 0.5
-        score_player2 = 0.5
-    elif gagnant.isdigit() and int(gagnant) in [1, 2]:
-        score_player1 = 1 if int(gagnant) == 1 else 0
-        score_player2 = 1 if int(gagnant) == 2 else 0
-    else:
-        print("Choix invalide. Les scores seront considérés comme nuls.")
-        score_player1 = 0.5
-        score_player2 = 0.5
-
-    match_details['player1']['score'] = score_player1
-    match_details['player2']['score'] = score_player2
-    match_details['resultats_saisis'] = True
-    
-    match_details['end_time'] = datetime.datetime.now().strftime("%H:%M")
-
-    save_tournament_data(tournoi)
-
-    print("Résultats enregistrés avec succès !\n")
-    input("Appuyez sur Entrée pour continuer...")
 
 
 
@@ -526,31 +492,6 @@ def afficher_liste_tournois_en_cours():
 
 
 
-def generate_player_ranking(tournament_data):
-    players = tournament_data.get('players', [])
-    player_results = {}
-
-    for round_data in tournament_data.get('rounds', []):
-        for match in round_data.get('matches', []):
-            for player_data in [match['player1'], match['player2']]:
-                player_id = player_data['id']
-                player_name = player_data['name']
-                player_score = player_data['score']
-
-                if player_id not in player_results:
-                    player_results[player_id] = {'name': player_name, 'score': 0}
-
-                player_results[player_id]['score'] += player_score
-
-    ranking = list(player_results.values())
-    ranking.sort(key=lambda x: x['score'], reverse=True)
-
-    return ranking
-
-
-if __name__ == "__main__":
-    gestion_tournois()
-
 def afficher_suivi_rounds(tournoi):
     if 'round_results' not in tournoi or not tournoi['round_results']:
         print("Aucun round n'a encore été joué.")
@@ -566,12 +507,6 @@ def afficher_suivi_rounds(tournoi):
 
 
 
-def update_player_scores(player_id, score):
-    global joueurs
-
-    for player in joueurs:
-        if player['id'] == player_id:
-            player['score'] += score
 
 def choisir_tournoi():
 
@@ -613,55 +548,98 @@ def calculate_tournament_score(player_id, tournament):
     return total_score
 
 
-def generate_tournament_ranking(players, tournament):
-    ranking = []
+def saisir_resultats_match(tournoi, match_details):
+    clear_screen()
+    print("Saisir les résultats du match...\n")
 
-    for player in players:
-        player_id = player['id']
-        total_score = calculate_tournament_score(player_id, tournament)
-        ranking.append({'id': player_id, 'name': player['name'], 'total_score': total_score})
+    player1_name = match_details['player1']['name']
+    player2_name = match_details['player2']['name']
 
-    ranking.sort(key=lambda x: x['total_score'], reverse=True)
+    print(f"Match entre {player1_name} (1) et {player2_name} (2)")
+    gagnant = input("Qui est le gagnant (1, 2, N pour match nul) : ")
+
+    if gagnant.lower() == 'n':
+        score_player1 = 0.5
+        score_player2 = 0.5
+    elif gagnant.isdigit() and int(gagnant) in [1, 2]:
+        score_player1 = 1 if int(gagnant) == 1 else 0
+        score_player2 = 1 if int(gagnant) == 2 else 0
+    else:
+        print("Choix invalide. Les scores seront considérés comme nuls.")
+        score_player1 = 0.5
+        score_player2 = 0.5
+
+    match_details['player1']['score'] = score_player1
+    match_details['player2']['score'] = score_player2
+    match_details['resultats_saisis'] = True
+    
+    match_details['end_time'] = datetime.datetime.now().strftime("%H:%M")
+
+    update_player_scores(match_details['player1']['id'], score_player1, tournoi)
+    update_player_scores(match_details['player2']['id'], score_player2, tournoi)
+
+    save_tournament_data(tournoi)
+
+    print("Résultats enregistrés avec succès !\n")
+    input("Appuyez sur Entrée pour continuer...")
+
+
+def generate_player_ranking(tournament_data):
+    players = tournament_data.get('players', [])
+    player_results = {}
+
+    for round_data in tournament_data.get('rounds', []):
+        for match in round_data.get('matches', []):
+            for player_data in [match['player1'], match['player2']]:
+                player_id = player_data['id']
+                player_name = player_data['name']
+                player_score = player_data['score']
+
+                if player_id not in player_results:
+                    player_results[player_id] = {'name': player_name, 'score': 0}
+
+                player_results[player_id]['score'] += player_score
+
+    ranking = list(player_results.values())
+    ranking.sort(key=lambda x: x['score'], reverse=True)
 
     return ranking
 
-def update_player_ranking(tournoi, player_id, score):
-    # Rechercher le joueur dans le classement du tournoi
+def update_player_scores(player_id, score, tournament):
     player_found = False
-    for player in tournoi['ranking']:
+
+    for player in tournament['ranking']:
         if player['id'] == player_id:
             player['score'] += score
             player_found = True
             break
 
     if not player_found:
-        tournoi['ranking'].append({
-            'id': player_id,
-            'score': score,
-        })
+        print(f"Warning: Player with ID {player_id} not found in the ranking. Score not updated.")
 
 
-
-
-def update_tournament_ranking(tournoi):
-    current_round_matches = tournoi['rounds'][tournoi['current_round'] - 1]['matches']
+def update_tournament_ranking(tournament):
+    current_round_number = tournament['current_round']
+    current_round_matches = tournament['rounds'][current_round_number - 1]['matches']
 
     for match in current_round_matches:
-        player1 = match['player1']
-        player2 = match['player2']
+        if match.get('resultats_saisis', False):
+            print(f"Updating scores for match: {match}")
+            update_player_scores(match['player1']['id'], match['player1']['score'], tournament)
+            update_player_scores(match['player2']['id'], match['player2']['score'], tournament)
 
-        update_player_ranking(tournoi, player1['id'], player1['score'])
+    tournament['ranking'].sort(key=lambda x: x['score'], reverse=True)
 
-        update_player_ranking(tournoi, player2['id'], player2['score'])
-
-    tournoi['ranking'].sort(key=lambda x: x['score'], reverse=True)
-
+    print("Updated ranking:")
+    print(tournament['ranking'])
 
 
-def display_tournament_ranking(ranking, tournament_name):
-    print(f"\nClassement du tournoi '{tournament_name}' :\n")
-    for i, player in enumerate(ranking, start=1):
-        print(f"{i}. {player['name']} - Score total : {player['total_score']}")
+
+def display_tournament_ranking(tournament):
+    print(f"\nClassement du tournoi '{tournament['name']}' :\n")
+    for i, player in enumerate(tournament['ranking'], start=1):
+        print(f"{i}. {player['name']} - Score : {player['score']}")
+
 
 
 def display_all_tournament_rankings():
@@ -674,7 +652,23 @@ def display_all_tournament_rankings():
             tournament_name = tournoi['name']
             players = tournoi.get('players', [])
             ranking = generate_tournament_ranking(players, tournoi)
-            display_tournament_ranking(ranking, tournament_name)
+            display_tournament_ranking(tournoi)  
+
+def generate_tournament_ranking(players, tournament):
+    ranking = tournament.get('ranking', [])
+
+    if not ranking:
+        ranking = [{'id': player['id'], 'name': player['name'], 'score': 0} for player in players]
+
+    for player in ranking:
+        player_id = player['id']
+        total_score = calculate_tournament_score(player_id, tournament)
+        player['score'] = total_score
+
+    ranking.sort(key=lambda x: x['score'], reverse=True)
+
+    return ranking
+
 
 def gerer_resultats_matchs(tournoi):
     current_round_number = tournoi['current_round']
@@ -710,10 +704,36 @@ def gerer_resultats_matchs(tournoi):
         else:
             print("Choix invalide. Veuillez réessayer.")
 
+
+def generate_tournament_ranking_from_matches(players, rounds):
+    ranking = []
+
+    for round in rounds:
+        for match in round['matches']:
+            for player_data in [match['player1'], match['player2']]:
+                player_id = player_data['id']
+                player_name = player_data['name']
+                score = player_data['score']
+
+                existing_player = next((player for player in ranking if player['id'] == player_id), None)
+
+                if existing_player:
+                    existing_player['score'] += score
+                else:
+                    ranking.append({'id': player_id, 'name': player_name, 'score': score})
+
+    ranking.sort(key=lambda x: x['score'], reverse=True)
+
+    return ranking
+
+
+
 def save_tournament_data(tournoi):
     if 'tournament_id' not in tournoi:
         print("Erreur: Impossible de sauvegarder les données du tournoi, l'identifiant du tournoi est manquant.")
         return
+
+    ranking = generate_tournament_ranking_from_matches(tournoi.get('players', []), tournoi.get('rounds', []))
 
     tournoi_to_save = {
         'tournament_id': tournoi['tournament_id'],
@@ -723,13 +743,14 @@ def save_tournament_data(tournoi):
         'end_date': tournoi['end_date'],
         'number_of_rounds': tournoi['number_of_rounds'],
         'current_round': tournoi.get('current_round', 0),
-        'ranking': tournoi.get('ranking', []),
+        'ranking': ranking,
         'rounds': tournoi.get('rounds', [])
     }
 
     file_path = os.path.join(TOURNOIS_DIR, f"{tournoi['tournament_id']}.json")
     with open(file_path, 'w') as file:
         json.dump(tournoi_to_save, file, indent=4)
+
 
 
     
