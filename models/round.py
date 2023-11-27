@@ -19,3 +19,15 @@ class Round:
 
     def mettre_a_jour_score(self, resultat_match):
         self.score += resultat_match
+
+    def generate_new_round_from_tournament(self, tournament, players):
+        if len(players) % 2 != 0:
+            raise ValueError("Le nombre de joueurs doit être pair pour créer des matchs.")
+
+        sorted_players = sorted(players, key=lambda x: x.score, reverse=True)
+
+        for i in range(0, len(sorted_players), 2):
+            player1 = sorted_players[i]
+            player2 = sorted_players[i + 1]
+            new_match = Match(player1, player2)
+            self.ajouter_match(new_match)

@@ -19,9 +19,11 @@ class Tournament:
         end_date,
         number_of_rounds,
         current_round=0,
-        players=[],
-        rounds=[],
+        players=None,  
+        rounds=None,
     ):
+        if players is None:
+            players = []  
         self.name = name
         self.location = location
         self.start_date = start_date
@@ -61,17 +63,19 @@ class Tournament:
 
 
 
+
     def next_round(self):
         if self.current_round < self.number_of_rounds:
             self.current_round += 1
-            new_round = Round()
-            self.rounds.append(new_round.generate_new_round_from_tournament(self))
+            new_round = Round(self.current_round)  
+            new_round.generate_new_round_from_tournament(self, self.players)  
+            self.rounds.append(new_round)
 
             for match in self.rounds[-1].matches:
-                player1 = match['player1']
-                player2 = match['player2']
-                player1.update_score(match['player1_score'])
-                player2.update_score(match['player2_score'])
+                player1 = match.player1
+                player2 = match.player2
+                player1.update_score(match.score_player1)
+                player2.update_score(match.score_player2)
 
             ranking = self.generate_player_ranking()
             self.save()
