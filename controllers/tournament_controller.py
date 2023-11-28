@@ -447,18 +447,15 @@ def lancer_prochain_round(tournoi):
     round_details = {'round_number': current_round_number + 1, 'matches': []}
 
     for match in matches:
-        player1 = match.get('player1', {})
-        player2 = match.get('player2', {})
+        player1 = match['player1']
+        player2 = match['player2']
         print(f"Match entre {player1.get('name', '')} "
             f"et {player2.get('name', '')} "
             f"- Début à {match.get('start_time', '')}")
 
-
         match_details = {
-            'player1': {'id': player1.get('id', ''), 'score': 0,
-                        'name': f"{player1.get('first_name', '')} {player1.get('last_name', '')}"},
-            'player2': {'id': player2.get('id', ''), 'score': 0,
-                        'name': f"{player2.get('first_name', '')} {player2.get('last_name', '')}"},
+            'player1': {'id': player1.get('id', ''), 'score': 0, 'name': player1.get('name', '')},
+            'player2': {'id': player2.get('id', ''), 'score': 0, 'name': player2.get('name', '')},
             'start_time': match.get('start_time', '')
         }
         round_details['matches'].append(match_details)
@@ -469,6 +466,7 @@ def lancer_prochain_round(tournoi):
 
     print(f"Round {current_round_number + 1} terminé.")
     input("Appuyez sur Entrée pour revenir au sous-menu.")
+
 
 def not_already_played(player, rounds):
     player_id = player.get('id', '')
@@ -484,11 +482,7 @@ def not_already_played(player, rounds):
     return True
 
 
-
-
-
 def generate_matches(players, formatted_start_time, played_matches=None):
-
     matches = []
     num_players = len(players)
 
@@ -499,13 +493,34 @@ def generate_matches(players, formatted_start_time, played_matches=None):
 
     while len(players) >= 2:
         player1_data = players.pop(0)
-        player2_data = players.pop(0)
+        player2_data = find_opponent(player1_data, players, played_matches)
 
         match = Match(player1_data['id'], player2_data['id'], start_time=formatted_start_time)
 
         matches.append({'match': match, 'player1': player1_data, 'player2': player2_data, 'start_time': formatted_start_time})
+        
+        # Ajouter le match à la liste des matchs joués
+        if played_matches is not None:
+            played_matches.append((player1_data['id'], player2_data['id']))
+            
+        # Retirer le joueur 2 de la liste des joueurs si pas déjà retiré
+        if player2_data in players:
+            players.remove(player2_data)
 
     return matches
+
+def find_opponent(player, players, played_matches=None):
+    # Prioritize players who haven't played with 'player'
+    potential_opponents = [p for p in players if p['id'] != player['id'] and (played_matches is None or (player['id'], p['id']) not in played_matches)]
+
+    if not potential_opponents:
+        # If no suitable opponent is found, choose from all remaining players
+        potential_opponents = [p for p in players if p['id'] != player['id']]
+
+    # Randomly choose an opponent
+    return random.choice(potential_opponents)
+
+
 
 def gestion_tournois():
     while True:
@@ -601,6 +616,52 @@ def calculate_tournament_score(player_id, tournament):
 
     return total_score
 
+def saisir_resultats_matchs(tournoi):
+    current_round_number = tournoi.get('current_round', 0)
+
+    if current_round_number == 0:
+        print("Le tournoi n'a pas encore commencé. Retour au menu principal.")
+        input("Appuyez sur Entrée pour continuer...")
+        return
+
+    if current_round_number > tournoi.get('number_of_rounds', 0):
+        print("Le tournoi est terminé. Retour au menu principal.")
+        input("Appuyez sur Entrée pour continuer...")
+        return
+
+    print(f"\nSaisir les résultats pour le Round {current_round_number}\n")
+
+    if 'rounds' in tournoi and tournoi['rounds']:
+        current_round = tournoi['rounds'][-1]  # Récupérer le dernier round
+        matches = current_round.get('matches', [])
+
+        if not matches:
+            print("Aucun match à saisir pour ce round.")
+            input("Appuyez sur Entrée pour continuer...")
+            return
+
+        for i, match in enumerate(matches, start=1):
+            player1 = match.get('player1', {})
+            player2 = match.get('player2', {})
+
+            print(f"{i}. Saisir les résultats pour le match entre {player1.get('name', '')} et {player2.get('name', '')}")
+
+        choice = input("\nEntrez le numéro du match que vous souhaitez gérer (ou appuyez sur Entrée pour revenir à la gestion des tournois en cours) : ")
+
+        if choice and choice.isdigit():
+            match_index = int(choice) - 1
+
+            if 0 <= match_index < len(matches):
+                saisir_resultats_match(tournoi, matches[match_index])
+                save_tournament_data(tournoi)
+                print("Résultats saisis avec succès.")
+            else:
+                print("Numéro de match invalide.")
+        else:
+            print("Retour à la gestion des tournois en cours.")
+    else:
+        print("Aucun round à saisir pour ce tournoi.")
+        input("Appuyez sur Entrée pour continuer...")
 
 def saisir_resultats_match(tournoi, match_details):
     clear_screen()
@@ -636,6 +697,7 @@ def saisir_resultats_match(tournoi, match_details):
 
     print("Résultats enregistrés avec succès !\n")
     input("Appuyez sur Entrée pour continuer...")
+
 
 
 def generate_player_ranking(tournament_data):
