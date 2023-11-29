@@ -251,11 +251,7 @@ def afficher_liste_tournois():
         for tournoi in tournois:
             print(f"ID: {tournoi['tournament_id']}")
             print(f"Nom: {tournoi['name']}")
-            print(f"Lieu: {tournoi['location']}")
-            print(f"Date début: {tournoi['start_date']}")
-            print(f"Date fin: {tournoi['end_date']}")
-            print(f"Nombre de rondes: {tournoi['number_of_rounds']}")
-
+           
             if tournoi.get('current_round', 0) == 0:
                 print("Le tournoi n'a pas encore commencé.")
             else:
@@ -343,7 +339,8 @@ def afficher_details_tournoi(tournoi):
 
         print("1. Saisir les résultats des matchs")
         print("2. Lancer le prochain round")
-        print("3. Revenir au menu principal")
+        print("3. Avis Direction")
+        print("4. Revenir au menu Gestion")
 
         choix = input("\nEntrez le numéro de votre choix : ")
 
@@ -355,11 +352,49 @@ def afficher_details_tournoi(tournoi):
             else:
                 print("Le tournoi est terminé. Retour au menu principal.")
         elif choix == "3":
+            ajouter_avis_direction(tournoi)
+        elif choix == "4":
             return
         else:
             print("Choix invalide. Retour au menu principal.")
     else:
         print("Aucun round n'a encore été joué.")
+
+def obtenir_nom_directeur():
+    nom_directeur = input("Entrez votre nom (Directeur) : ")
+    return nom_directeur
+
+def ajouter_avis_direction(tournoi):
+    clear_screen()  
+    nom_directeur = obtenir_nom_directeur()
+    
+    if 'avis_direction' in tournoi:
+        avis_existant = tournoi['avis_direction']
+        print(f"Avis existant du Directeur :\n{avis_existant}\n")
+        ajouter_nouvel_avis = input("Voulez-vous ajouter un nouvel avis? (O/N): ").lower() == 'o'
+    else:
+        ajouter_nouvel_avis = True
+
+    if ajouter_nouvel_avis:
+        avis_direction = input("Entrez votre nouvel avis : ")
+        remarques = f"Avis du Directeur ({nom_directeur}):\n{avis_direction}"
+
+        if 'avis_direction' in tournoi:
+            tournoi['avis_direction'] += f"\n\n{remarques}"
+        else:
+            tournoi['avis_direction'] = remarques
+
+        save_tournament_data(tournoi)
+        print("Avis enregistré avec succès.")
+        
+        afficher_details_tournoi(tournoi)
+        
+        input("Appuyez sur Entrée pour continuer...")  
+    else:
+        print("Aucun nouvel avis ajouté.")
+        input("Appuyez sur Entrée pour continuer...")  
+
+
 
 
 def lancer_premier_round(tournoi):
@@ -510,14 +545,11 @@ def generate_matches(players, formatted_start_time, played_matches=None):
     return matches
 
 def find_opponent(player, players, played_matches=None):
-    # Prioritize players who haven't played with 'player'
     potential_opponents = [p for p in players if p['id'] != player['id'] and (played_matches is None or (player['id'], p['id']) not in played_matches)]
 
     if not potential_opponents:
-        # If no suitable opponent is found, choose from all remaining players
         potential_opponents = [p for p in players if p['id'] != player['id']]
 
-    # Randomly choose an opponent
     return random.choice(potential_opponents)
 
 
@@ -632,7 +664,7 @@ def saisir_resultats_matchs(tournoi):
     print(f"\nSaisir les résultats pour le Round {current_round_number}\n")
 
     if 'rounds' in tournoi and tournoi['rounds']:
-        current_round = tournoi['rounds'][-1]  # Récupérer le dernier round
+        current_round = tournoi['rounds'][-1]  
         matches = current_round.get('matches', [])
 
         if not matches:
@@ -856,6 +888,9 @@ def save_tournament_data(tournoi):
         'ranking': ranking,
         'rounds': tournoi.get('rounds', [])
     }
+
+    if 'avis_direction' in tournoi:
+        tournoi_to_save['avis_direction'] = tournoi['avis_direction']
 
     file_path = os.path.join(TOURNOIS_DIR, f"{tournoi['tournament_id']}.json")
     with open(file_path, 'w') as file:
