@@ -5,7 +5,7 @@ import json
 import random
 import datetime 
 from models.tournament import Tournament
-from controllers.player_controller import afficher_liste_joueurs
+from controllers.player_controller import display_players_list
 from config.config import Config
 from models.match import Match
 from itertools import combinations
@@ -29,19 +29,13 @@ def get_valid_date(prompt):
         else:
             print("Format de date invalide. Veuillez utiliser jj/mm/aaaa.")
 
-def generer_suffixe_unique(name, existing_tournaments):
+def generate_unique_suffix(name, existing_tournaments):
     i = 1
     new_name = name
     while any(t['name'] == new_name for t in existing_tournaments):
         new_name = f"{name}_{i}"
         i += 1
     return new_name
-
-def afficher_joueurs_disponibles(joueurs_disponibles):
-    print("Liste des joueurs disponibles :\n")
-    for joueur in joueurs_disponibles:
-        print(f"ID: {joueur['id']}, Prénom: {joueur['first_name']}, Nom: {joueur['last_name']}")
-    print("\n")
 
 def display_available_players(joueurs_disponibles):
     print("Liste des joueurs disponibles :\n")
@@ -85,7 +79,7 @@ def select_players(joueurs_disponibles, joueurs_selectionnes, min_players, max_p
             print("ID de joueur invalide. Veuillez réessayer.")
 
 
-def enregistrer_joueur():
+def register_player():
     global joueurs  
     setup_directories()
     clear_screen()
@@ -107,10 +101,11 @@ def load_all_players():
     return joueurs
 
 
-def trouver_joueur_par_id(joueur_id):
+def find_player_by_id(player_id):
+
     joueurs = load_all_players()
     for joueur in joueurs:
-        if joueur['id'] == joueur_id:
+        if joueur['id'] == player_id:
             return joueur
     return None
 
@@ -173,7 +168,7 @@ def update_player_scores(players, matches):
     return players
 
 
-def enregistrer_tournoi():
+def register_tournament():
     global joueurs, tournament  
     setup_directories()
     clear_screen()
@@ -194,7 +189,7 @@ def enregistrer_tournoi():
 
     number_of_rounds = int(input("Nombre de rondes : "))
 
-    afficher_liste_joueurs(joueurs_disponibles)
+    display_players_list(joueurs_disponibles)
 
     if os.path.exists(Config.JOUEURS_FILE):
         with open(Config.JOUEURS_FILE, 'r') as file:
@@ -236,9 +231,7 @@ def validate_end_date(start_date, end_date):
     end_date_obj = datetime.datetime.strptime(end_date, '%d/%m/%Y')
     return end_date_obj >= start_date_obj
 
-
-
-def afficher_liste_tournois():
+def display_tournament_list():
     setup_directories()
     clear_screen()
 
@@ -262,9 +255,9 @@ def afficher_liste_tournois():
         selected_tournament_id = input("Entrez l'ID du tournoi que vous souhaitez afficher (ou appuyez sur Entrée pour revenir au menu) : ").strip()
 
         if selected_tournament_id:
-            selected_tournament = trouver_tournoi_par_id(selected_tournament_id)
+            selected_tournament = find_tournament_by_id(selected_tournament_id)
             if selected_tournament:
-                afficher_details_tournoi(selected_tournament)
+                display_tournament_details(selected_tournament)
             else:
                 print("ID de tournoi invalide. Veuillez réessayer.")
         else:
@@ -282,11 +275,12 @@ def load_all_tournaments():
                     tournois.append(tournoi_data)
     return tournois
 
-def gerer_tournois_en_cours():
+def manage_ongoing_tournaments():
+
     while True:
         clear_screen()
         print("Gérer les tournois en cours...\n")
-        afficher_liste_tournois_en_cours()
+        display_ongoing_tournaments()
 
         choix = input("\nEntrez le numéro du tournoi que vous souhaitez gérer ou appuyez sur 'M' pour revenir au menu : ")
 
@@ -295,20 +289,20 @@ def gerer_tournois_en_cours():
         elif not choix.strip():
             return  
 
-        tournoi = trouver_tournoi_par_id(choix)
+        tournoi = find_tournament_by_id(choix)
         if tournoi:
-            afficher_details_tournoi(tournoi)
-            gerer_resultats_matchs(tournoi)
+            display_tournament_details(tournoi)
+            manage_match_results(tournoi)
 
 
-def trouver_tournoi_par_id(tournoi_id):
+def find_tournament_by_id(tournament_id):
     tournois_en_cours = load_all_tournaments()
     for tournoi in tournois_en_cours:
-        if tournoi['tournament_id'] == tournoi_id:
+        if tournoi['tournament_id'] == tournament_id:
             return tournoi
     return None
 
-def afficher_details_tournoi(tournoi):
+def display_tournament_details(tournoi):
     clear_screen()
     print(f"\nDétails du tournoi en cours :\n")
     print(f"ID: {tournoi['tournament_id']}")
@@ -325,8 +319,8 @@ def afficher_details_tournoi(tournoi):
 
         print(f"Round {current_round_number} :")
         for match in current_round_matches:
-            joueur1 = trouver_joueur_par_id(match['player1']['id'])
-            joueur2 = trouver_joueur_par_id(match['player2']['id'])
+            joueur1 = find_player_by_id(match['player1']['id'])
+            joueur2 = find_player_by_id(match['player2']['id'])
 
             print(f"\nMatch entre {joueur1['first_name']} {joueur1['last_name']} et {joueur2['first_name']} {joueur2['last_name']}")
             print(f"Score : {match['player1']['score']} - {match['player2']['score']}")
@@ -345,14 +339,14 @@ def afficher_details_tournoi(tournoi):
         choix = input("\nEntrez le numéro de votre choix : ")
 
         if choix == "1":
-            gerer_resultats_matchs(tournoi)
+            manage_match_results(tournoi)
         elif choix == "2":
             if tournoi['current_round'] < tournoi['number_of_rounds']:
-                lancer_prochain_round(tournoi)
+                start_next_round(tournoi)
             else:
                 print("Le tournoi est terminé. Retour au menu principal.")
         elif choix == "3":
-            ajouter_avis_direction(tournoi)
+            add_director_opinion(tournoi)
         elif choix == "4":
             return
         else:
@@ -360,13 +354,13 @@ def afficher_details_tournoi(tournoi):
     else:
         print("Aucun round n'a encore été joué.")
 
-def obtenir_nom_directeur():
+def get_director_name():
     nom_directeur = input("Entrez votre nom (Directeur) : ")
     return nom_directeur
 
-def ajouter_avis_direction(tournoi):
+def add_director_opinion(tournoi):
     clear_screen()  
-    nom_directeur = obtenir_nom_directeur()
+    nom_directeur = get_director_name()
     
     if 'avis_direction' in tournoi:
         avis_existant = tournoi['avis_direction']
@@ -387,17 +381,14 @@ def ajouter_avis_direction(tournoi):
         save_tournament_data(tournoi)
         print("Avis enregistré avec succès.")
         
-        afficher_details_tournoi(tournoi)
+        display_tournament_details(tournoi)
         
         input("Appuyez sur Entrée pour continuer...")  
     else:
         print("Aucun nouvel avis ajouté.")
         input("Appuyez sur Entrée pour continuer...")  
 
-
-
-
-def lancer_premier_round(tournoi):
+def start_first_round(tournoi):
     if tournoi.get('current_round', 0) > 0:
         print(f"Le tournoi '{tournoi['name']}' a déjà commencé. Retour au menu principal.")
         input("Appuyez sur Entrée pour continuer...")
@@ -450,7 +441,7 @@ def lancer_premier_round(tournoi):
     print("Premier Round terminé.")
     input("Appuyez sur Entrée pour revenir au sous-menu...")
 
-def lancer_prochain_round(tournoi):
+def start_next_round(tournoi):
     if 'ranking' not in tournoi:
         print("La clé 'ranking' n'est pas présente dans l'objet tournoi.")
         return
@@ -534,11 +525,9 @@ def generate_matches(players, formatted_start_time, played_matches=None):
 
         matches.append({'match': match, 'player1': player1_data, 'player2': player2_data, 'start_time': formatted_start_time})
         
-        # Ajouter le match à la liste des matchs joués
         if played_matches is not None:
             played_matches.append((player1_data['id'], player2_data['id']))
             
-        # Retirer le joueur 2 de la liste des joueurs si pas déjà retiré
         if player2_data in players:
             players.remove(player2_data)
 
@@ -554,7 +543,7 @@ def find_opponent(player, players, played_matches=None):
 
 
 
-def gestion_tournois():
+def manage_tournaments():
     while True:
         clear_screen()
         print("Gestion des tournois en cours...\n")
@@ -565,17 +554,18 @@ def gestion_tournois():
         choix = input("\nEntrez le numéro de votre choix : ")
 
         if choix == "1":
-            tournoi = choisir_tournoi()
+            tournoi = choose_tournament()
             if tournoi:
-                lancer_premier_round(tournoi)
+                start_first_round(tournoi)
         elif choix == "2":
-            gerer_tournois_en_cours()
+            manage_ongoing_tournaments()
+
         elif choix == "3":
             break
         else:
             print("Choix invalide. Veuillez réessayer.")
 
-def afficher_liste_tournois_en_cours():
+def display_ongoing_tournaments():
     tournois_en_cours = [tournoi for tournoi in load_all_tournaments() if tournoi.get('current_round', 0) > 0]
 
     if not tournois_en_cours:
@@ -590,15 +580,15 @@ def afficher_liste_tournois_en_cours():
         choix = input("\nSaisissez l'ID du tournoi que vous souhaitez gérer (ou appuyez sur Entrée pour retourner au menu) : ")
         
         if choix:
-            tournoi_choisi = trouver_tournoi_par_id(choix)
+            tournoi_choisi = find_tournament_by_id(choix)
             if tournoi_choisi:
-                afficher_details_tournoi(tournoi_choisi)
+                display_tournament_details(tournoi_choisi)
             else:
                 print("ID de tournoi invalide. Veuillez réessayer.")
         else:
             print("Retour au menu principal.")
 
-def afficher_suivi_rounds(tournoi):
+def display_round_results(tournoi):
     if 'round_results' not in tournoi or not tournoi['round_results']:
         print("Aucun round n'a encore été joué.")
         return
@@ -611,7 +601,7 @@ def afficher_suivi_rounds(tournoi):
                   f"et {match['player2']['first_name']} {match['player2']['last_name']}")
             print(f"Score : {match['match'].score_player1} - {match['match'].score_player2}\n")
 
-def choisir_tournoi():
+def choose_tournament():
 
     clear_screen()
     print("Choisir un tournoi par son ID :")
@@ -648,7 +638,7 @@ def calculate_tournament_score(player_id, tournament):
 
     return total_score
 
-def saisir_resultats_matchs(tournoi):
+def enter_match_results(tournoi):
     current_round_number = tournoi.get('current_round', 0)
 
     if current_round_number == 0:
@@ -684,7 +674,7 @@ def saisir_resultats_matchs(tournoi):
             match_index = int(choice) - 1
 
             if 0 <= match_index < len(matches):
-                saisir_resultats_match(tournoi, matches[match_index])
+                enter_match_results(tournoi, matches[match_index])
                 save_tournament_data(tournoi)
                 print("Résultats saisis avec succès.")
             else:
@@ -695,7 +685,7 @@ def saisir_resultats_matchs(tournoi):
         print("Aucun round à saisir pour ce tournoi.")
         input("Appuyez sur Entrée pour continuer...")
 
-def saisir_resultats_match(tournoi, match_details):
+def enter_match_results(tournoi, match_details):
     clear_screen()
     print("Saisir les résultats du match...\n")
 
@@ -814,7 +804,7 @@ def generate_tournament_ranking(players, tournament):
     return ranking
 
 
-def gerer_resultats_matchs(tournoi):
+def manage_match_results(tournoi):
     current_round_number = tournoi['current_round']
     current_round_matches = tournoi['rounds'][current_round_number - 1]['matches']
 
@@ -841,7 +831,7 @@ def gerer_resultats_matchs(tournoi):
             if selected_match.get('resultats_saisis', False):
                 print("Les résultats de ce match ont déjà été saisis. Veuillez choisir un autre match.")
             else:
-                saisir_resultats_match(tournoi, selected_match)
+                enter_match_results(tournoi, selected_match)
                 update_tournament_ranking(tournoi)
         elif not choix.strip():
             break
@@ -906,4 +896,4 @@ def setup_directories():
 
 
 if __name__ == "__main__":
-    gestion_tournois()
+   manage_tournaments()

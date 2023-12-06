@@ -17,7 +17,7 @@ def setup_directories():
     if not os.path.exists(JOUEURS_DIR):
         os.makedirs(JOUEURS_DIR)
 
-def enregistrer_joueur():
+def register_player():
     setup_directories()
     clear_screen()
 
@@ -61,11 +61,11 @@ def enregistrer_joueur():
         if continuer.lower() != "oui":
             break
 
-def retour_menu():
+def return_to_menu():
     input("Appuyez sur une touche pour retourner au menu...")
     clear_screen()
 
-def afficher_liste_joueurs(avec_message=True):
+def display_players_list(avec_message=True):
     if avec_message:
         clear_screen()
         print("Affichage de la liste des joueurs...")

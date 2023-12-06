@@ -2,8 +2,8 @@
 
 import os
 
-from controllers.tournament_controller import enregistrer_tournoi, afficher_liste_tournois, gestion_tournois
-from controllers.player_controller import enregistrer_joueur, afficher_liste_joueurs
+from controllers.tournament_controller import register_tournament, display_tournament_list, manage_tournaments
+from controllers.player_controller import register_player, display_players_list
 from config.config import Config
 
 DATA_DIR = "data"
@@ -27,17 +27,17 @@ def main_menu():
         choix = input("Entrez votre choix : ")
 
         if choix == "1":
-            enregistrer_joueur()
+            register_player()
         elif choix == "2":
-            afficher_liste_joueurs()
+            display_players_list()
 
         elif choix == "3":
-            enregistrer_tournoi()
+            register_tournament()
         elif choix == "4":
-            afficher_liste_tournois()
+            display_tournament_list()
 
         elif choix == "5":
-            gestion_tournois()
+            manage_tournaments()
 
         elif choix.lower() == "q":
             exit()

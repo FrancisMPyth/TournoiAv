@@ -6,8 +6,7 @@ from models.round import Round
 from config.config import Config
 
 class Tournament:
-    counter = 1  # Initialiser le compteur à 1
-
+    counter = 1  
     def __init__(self):
         pass
 
