@@ -4,22 +4,45 @@ import os
 from views.main_menu import main_menu 
 from config.config import Config
 
-DATA_DIR = "data"
-JOUEURS_DIR = os.path.join(DATA_DIR, "joueurs")
-JOUEURS_FILE = os.path.join(JOUEURS_DIR, "joueurs.json")
-TOURNOIS_DIR = os.path.join(DATA_DIR, "tournois")
-TOURNOIS_FILE = os.path.join(TOURNOIS_DIR, "tournois.json")
-
-
 def setup_directories():
-    if not os.path.exists(DATA_DIR):
-        os.makedirs(DATA_DIR)
+    if not os.path.exists(Config.DATA_DIR):
+        os.makedirs(Config.DATA_DIR)
 
-    if not os.path.exists(JOUEURS_DIR):
-        os.makedirs(JOUEURS_DIR)
+    if not os.path.exists(Config.JOUEURS_DIR):
+        os.makedirs(Config.JOUEURS_DIR)
 
-    if not os.path.exists(TOURNOIS_DIR):
-        os.makedirs(TOURNOIS_DIR)
+    if not os.path.exists(Config.TOURNOIS_DIR):
+        os.makedirs(Config.TOURNOIS_DIR)
+
+
+def check_existing_directories():
+    return os.path.exists(Config.JOUEURS_DIR) and os.path.exists(Config.TOURNOIS_DIR)
+
+
+def get_available_drives():
+    drives = [drive for drive in range(ord('A'), ord('Z') + 1) if os.path.exists(chr(drive) + ':')]
+    return [chr(drive) + ':' for drive in drives]
+
+
+def select_drive():
+    available_drives = get_available_drives()
+
+    if len(available_drives) == 1:
+        return available_drives[0]
+
+    print("Liste des disques disponibles:")
+    for i, drive in enumerate(available_drives, start=1):
+        print(f"{i}. {drive}")
+
+    choice = input("Entrez le numéro du disque que vous souhaitez utiliser : ")
+
+    try:
+        choice_index = int(choice) - 1
+        selected_drive = available_drives[choice_index]
+        return selected_drive
+    except (ValueError, IndexError):
+        print("Choix invalide. Utilisation du premier disque disponible.")
+        return available_drives[0]
 
 
 def clear_screen():
@@ -28,5 +51,9 @@ def clear_screen():
 
 if __name__ == "__main__":
     setup_directories()
+
+    if not check_existing_directories():
+        selected_drive = select_drive()
+        Config.DATA_DIR = os.path.join(selected_drive, "data")
 
     main_menu()

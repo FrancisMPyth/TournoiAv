@@ -6,13 +6,6 @@ from controllers.tournament_controller import register_tournament, display_tourn
 from controllers.player_controller import register_player, display_players_list
 from config.config import Config
 
-DATA_DIR = "data"
-JOUEURS_DIR = os.path.join(DATA_DIR, "joueurs")
-JOUEURS_FILE = os.path.join(JOUEURS_DIR, "joueurs.json")
-TOURNOIS_DIR = os.path.join(DATA_DIR, "tournois")
-TOURNOIS_FILE = os.path.join(TOURNOIS_DIR, "tournois.json")
-
-
 def main_menu():
     while True:
         clear_screen()
@@ -47,14 +40,14 @@ def main_menu():
         input("Appuyez sur une touche pour continuer...")
 
 def setup_directories():
-    if not os.path.exists(DATA_DIR):
-        os.makedirs(DATA_DIR)
+    if not os.path.exists(Config.DATA_DIR):
+        os.makedirs(Config.DATA_DIR)
 
-    if not os.path.exists(JOUEURS_DIR):
-        os.makedirs(JOUEURS_DIR)
+    if not os.path.exists(Config.JOUEURS_DIR):
+        os.makedirs(Config.JOUEURS_DIR)
 
-    if not os.path.exists(TOURNOIS_DIR):
-        os.makedirs(TOURNOIS_DIR)
+    if not os.path.exists(Config.TOURNOIS_DIR):
+        os.makedirs(Config.TOURNOIS_DIR)
 
 
 def clear_screen():
