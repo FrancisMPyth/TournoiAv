@@ -1,0 +1,66 @@
+[
+    {
+        "id": 1,
+        "first_name": "Francis",
+        "last_name": "Mterfi",
+        "date_of_birth": "28/12/1968",
+        "chess_id": "ML12345",
+        "score": 0
+    },
+    {
+        "id": 2,
+        "first_name": "Patrick",
+        "last_name": "Pinot",
+        "date_of_birth": "12/10/2019",
+        "chess_id": "ML12345",
+        "score": 0
+    },
+    {
+        "id": 3,
+        "first_name": "Paul",
+        "last_name": "Premier",
+        "date_of_birth": "12/10/1954",
+        "chess_id": "ML12345",
+        "score": 0
+    },
+    {
+        "id": 4,
+        "first_name": "Louise",
+        "last_name": "Michelin",
+        "date_of_birth": "12/10/1954",
+        "chess_id": "ML12345",
+        "score": 0
+    },
+    {
+        "id": 5,
+        "first_name": "Karl",
+        "last_name": "Petit",
+        "date_of_birth": "12/01/1945",
+        "chess_id": "KL54678",
+        "score": 0
+    },
+    {
+        "id": 6,
+        "first_name": "Marie",
+        "last_name": "Start",
+        "date_of_birth": "12/10/1945",
+        "chess_id": "LO12345",
+        "score": 0
+    },
+    {
+        "id": 7,
+        "first_name": "Micheline",
+        "last_name": "Prost",
+        "date_of_birth": "14/12/1945",
+        "chess_id": "ML12345",
+        "score": 0
+    },
+    {
+        "id": 8,
+        "first_name": "Kit",
+        "last_name": "Kat",
+        "date_of_birth": "14/10/1945",
+        "chess_id": "ML12345",
+        "score": 0
+    }
+]

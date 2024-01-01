@@ -2,9 +2,11 @@
 
 import json
 import os
+import datetime
+
 from models.player import Player
 from config.config import Config
-import datetime
+
 
 DATA_DIR = "data"
 JOUEURS_DIR = os.path.join(DATA_DIR, "joueurs")

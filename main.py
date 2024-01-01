@@ -1,6 +1,7 @@
 # main.py
 
 import os
+
 from views.main_menu import main_menu 
 from config.config import Config
 

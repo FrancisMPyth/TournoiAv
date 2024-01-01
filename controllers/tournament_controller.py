@@ -4,19 +4,22 @@ import os
 import json
 import random
 import datetime 
+import itertools
+
+
 from models.tournament import Tournament
 from controllers.player_controller import display_players_list
 from config.config import Config
 from models.match import Match
+
 from itertools import combinations
-import itertools
 
 
 DATA_DIR = "data"
 TOURNOIS_DIR = os.path.join(DATA_DIR, "tournois")
 TOURNAMENT_DATA_DIR = Config.TOURNOIS_DIR 
-joueurs = []
-joueurs_selectionnes = []
+players = []
+selected_players = []
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -79,32 +82,32 @@ def select_players(joueurs_disponibles, joueurs_selectionnes, min_players, max_p
             print("ID de joueur invalide. Veuillez réessayer.")
 
 def register_player():
-    global joueurs  
+    global players  
     setup_directories()
     clear_screen()
 
-    joueurs_disponibles = joueurs.copy()
+    joueurs_disponibles = players.copy()
 
     if os.path.exists(Config.JOUEURS_FILE):
         with open(Config.JOUEURS_FILE, 'r') as file:
-            joueurs = json.load(file)
+            players = json.load(file)
 
-    select_players(joueurs_disponibles, joueurs_selectionnes, min_players=8, max_players=float('inf'))
+    select_players(joueurs_disponibles, selected_players, min_players=8, max_players=float('inf'))
 
 def load_all_players():
-    global joueurs
-    joueurs = []
+    global players
+    players = []
     if os.path.exists(Config.JOUEURS_FILE):
         with open(Config.JOUEURS_FILE, 'r') as file:
-            joueurs = json.load(file)
-    return joueurs
+            players = json.load(file)
+    return players
 
 def find_player_by_id(player_id):
 
-    joueurs = load_all_players()
-    for joueur in joueurs:
-        if joueur['id'] == player_id:
-            return joueur
+    players = load_all_players()
+    for players in players:
+        if players['id'] == player_id:
+            return players
     return None
 
 def update_played_pairs(tournament):
@@ -164,7 +167,7 @@ def update_player_scores(players, matches):
     return players
 
 def register_tournament():
-    global joueurs, tournament  
+    global players, tournament  
     setup_directories()
     clear_screen()
 
@@ -173,7 +176,7 @@ def register_tournament():
 
     start_date = get_valid_date("Date de début (jj/mm/aaaa) : ")
 
-    joueurs_disponibles = joueurs.copy()
+    joueurs_disponibles = players.copy()
 
     while True:
         end_date = get_valid_date("Date de fin (jj/mm/aaaa) : ")
@@ -188,9 +191,9 @@ def register_tournament():
 
     if os.path.exists(Config.JOUEURS_FILE):
         with open(Config.JOUEURS_FILE, 'r') as file:
-            joueurs = json.load(file)
+            players = json.load(file)
 
-    joueurs_disponibles = joueurs.copy()
+    joueurs_disponibles = players.copy()
 
     joueurs_selectionnes = []  
     select_players(joueurs_disponibles, joueurs_selectionnes, min_players=2, max_players=float('inf'))
