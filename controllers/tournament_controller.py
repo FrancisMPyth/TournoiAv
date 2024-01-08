@@ -284,29 +284,44 @@ def manage_ongoing_tournaments(return_to_main_menu=False):
             print("Aucun tournoi en cours.")
             break
 
-        tournoi = tournois_en_cours[0]
-
         clear_screen()
-        display_tournament_details(tournoi)
+        for index, tournoi in enumerate(tournois_en_cours, start=1):
+            print(f"{index}. Détails du tournoi {tournoi['tournament_id']}")
 
-        print("\n1. Saisir les résultats des matchs")
-        print("2. Lancer le prochain round")
-        print("3. Avis Direction")
-        print("4. Revenir au menu principal" if return_to_main_menu else "4. Revenir au menu Gestion")
+        choix = input("\nEntrez le numéro du tournoi que vous souhaitez gérer (ou 'Q' pour quitter) : ")
 
-        sous_menu_choice = input("\nEntrez le numéro de votre choix : ")
+        if choix.lower() == "q":
+            break
 
-        if sous_menu_choice == "1":
-            manage_match_results(tournoi)
-        elif sous_menu_choice == "2":
-            start_next_round(tournoi)
-        elif sous_menu_choice == "3":
-            add_director_opinion(tournoi)
-        elif sous_menu_choice == "4":
-            if return_to_main_menu:
-                break
-        else:
-            print("Choix invalide. Retour au menu Gestion.")
+        try:
+            choix = int(choix)
+            if 1 <= choix <= len(tournois_en_cours):
+                tournoi = tournois_en_cours[choix - 1]
+                display_tournament_details(tournoi)
+
+                print("\n1. Saisir les résultats des matchs")
+                print("2. Lancer le prochain round")
+                print("3. Avis Direction")
+                print("4. Revenir au menu principal" if return_to_main_menu else "4. Revenir au menu Gestion")
+
+                sous_menu_choice = input("\nEntrez le numéro de votre choix : ")
+
+                if sous_menu_choice == "1":
+                    manage_match_results(tournoi)
+                elif sous_menu_choice == "2":
+                    start_next_round(tournoi)
+                elif sous_menu_choice == "3":
+                    add_director_opinion(tournoi)
+                elif sous_menu_choice == "4":
+                    if return_to_main_menu:
+                        break
+                else:
+                    print("Choix invalide. Retour au menu Gestion.")
+            else:
+                print("Choix invalide. Veuillez réessayer.")
+        except ValueError:
+            print("Veuillez entrer un numéro valide.")
+
 
 
 
@@ -329,6 +344,10 @@ def display_tournament_details(tournoi):
     print(f"Nombre de rondes: {tournoi['number_of_rounds']}")
     print(f"Tour en cours: {tournoi['current_round']}/{tournoi['number_of_rounds']}\n")
 
+
+
+
+
     if 'rounds' in tournoi and tournoi['rounds']:
         current_round_number = tournoi['current_round']
         current_round_matches = tournoi['rounds'][current_round_number - 1]['matches']
@@ -350,7 +369,7 @@ def display_tournament_details(tournoi):
         print("1. Saisir les résultats des matchs")
         print("2. Lancer le prochain round")
         print("3. Avis Direction")
-        print("4. Revenir au menu Gestion")
+        print("4. Revenir à la selection du Tournoi")
 
         choix = input("\nEntrez le numéro de votre choix : ")
 
@@ -364,11 +383,12 @@ def display_tournament_details(tournoi):
         elif choix == "3":
             add_director_opinion(tournoi)
         elif choix == "4":
-            return
+            return False 
         else:
             print("Choix invalide. Retour au menu principal.")
     else:
         print("Aucun round n'a encore été joué.")
+
 
 def get_director_name():
     nom_directeur = input("Entrez votre nom (Directeur) : ")
